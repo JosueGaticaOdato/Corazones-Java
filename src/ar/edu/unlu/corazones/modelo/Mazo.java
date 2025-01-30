@@ -1,18 +1,11 @@
 package ar.edu.unlu.corazones.modelo;
 
-import java.io.Serializable;
 import java.util.Random;
 
 /* Mazo: Es una pila de cartas implementada como un array, donde se le reparten
 a los jugadores las cartas que estan en el tope del mazo*/
 
-public class Mazo implements Serializable{
-	
-	// *************************************************************
-	//                        SERIALIZABLE
-	// *************************************************************
-	
-	private static final long serialVersionUID = 1L;
+public class Mazo {
 
 	// *************************************************************
 	//                        CONSTANTES

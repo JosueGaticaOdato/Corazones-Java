@@ -1,6 +1,7 @@
 package ar.edu.unlu.corazones.modelo;
 
 public class Carta {
+	
 	// *************************************************************
 	//                        ATRIBUTOS
 	// *************************************************************
@@ -9,7 +10,7 @@ public class Carta {
 	
 	private int valor;
 	
-	private String valorTexto; // Numeros o  J,Q,K y A
+	private String valorTexto; // Numeros o J,Q,K y A
 	
 	// *************************************************************
 	//                       CONSTRUCTOR

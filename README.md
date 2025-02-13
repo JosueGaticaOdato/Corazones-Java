@@ -1,1 +1,1 @@
-# Juego Corazones hecho en Java, uti
+# Juego Corazones hecho en Java, utilizando POO

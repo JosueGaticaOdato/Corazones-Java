@@ -2,9 +2,6 @@ package ar.edu.unlu.corazones.modelo;
 
 import java.util.Random;
 
-/* Mazo: Es una pila de cartas implementada como un array, donde se le reparten
-a los jugadores las cartas que estan en el tope del mazo*/
-
 public class Mazo {
 
 	// *************************************************************
@@ -22,7 +19,7 @@ public class Mazo {
 	
 	private Carta[] mazo;
 
-	private int tope;
+	private int tope; //Pila de cartas
 	
 	// *************************************************************
 	//                       CONSTRUCTOR

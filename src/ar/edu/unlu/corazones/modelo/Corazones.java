@@ -12,7 +12,7 @@ public class Corazones implements Observable{
 	// 						CONSTANTES
 	// *************************************************************
 
-	private static final int cantCartasRepartidas = 7; // TESTING (13)
+	private static final int cantCartasRepartidas = 13; // TESTING (13)
 	private static final int cantCartasIntercambio = 2; // TESTING (3)
 	private static final int puntajeMaximo = 1; // TESTING (100)
 	private static final int cantJugadores = 4;
@@ -50,10 +50,10 @@ public class Corazones implements Observable{
 		ronda = 1;
 		
 		// Jugadores por defecto
-		//agregarJugadores("Jugador A");
-		//agregarJugadores("Jugador B");
-		//agregarJugadores("Jugador C");
-		//agregarJugadores("Jugador D");
+		agregarJugadores("Jugador A");
+		agregarJugadores("Jugador B");
+		agregarJugadores("Jugador C");
+		agregarJugadores("Jugador D");
 
 		this.observadores = new ArrayList<>();
 		this.jugadas = new ArrayList<>();
@@ -72,7 +72,7 @@ public class Corazones implements Observable{
 			repartirCartas();
 			notificar(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			pasajeDeCartas();
+			//pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {

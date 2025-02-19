@@ -80,6 +80,7 @@ public class Corazones implements Observable{
 				int i = 0;
 				Jugada jugada = new Jugada(this.jugadores);
 				jugadas.add(jugada);
+				notificar(EventosCorazones.NUEVA_JUGADA);
 				
 				/*CASO 2 DE TREBOL*/
 				if (j == 0) {

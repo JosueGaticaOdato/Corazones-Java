@@ -136,9 +136,28 @@ public class Controlador implements Observador {
 		// TODO Auto-generated method stub
 		if (evento instanceof EventosCorazones) {
 			switch ((EventosCorazones) evento) {
+			
 			case CARTAS_REPARTIDAS:
 				this.vista.cartasRepartidas();
 				break;
+			case PASAJE_DE_CARTAS:
+				this.vista.pasajeDeCartas();
+				break;
+			case PEDIR_CARTA_PASAJE:
+				this.vista.pedirCartaPasaje();
+				break;
+			case CARTA_TIRADA_VALIDA_PASAJE:
+				this.vista.cartaTiradaValidaPasaje();
+				break;
+			case CARTA_TIRADA_INVALIDA_PASAJE:
+				this.vista.cartaTiradaInvalidaPasaje();
+				break;
+			case FIN_PASAJE_DE_CARTAS:
+				this.vista.finPasajeDeCartas();
+				break;	
+			case NUEVA_JUGADA:
+				this.vista.nuevaJugada();
+				break;	
 			case PEDIR_CARTA:
 				this.vista.pedirCarta();
 				break;
@@ -163,7 +182,7 @@ public class Controlador implements Observador {
 			case FIN_DE_RONDA:
 				this.vista.finDeRonda();
 				break;
-			case 	FIN_DE_JUEGO:
+			case FIN_DE_JUEGO:
 				this.vista.finDeJuego();
 				break;
 			}

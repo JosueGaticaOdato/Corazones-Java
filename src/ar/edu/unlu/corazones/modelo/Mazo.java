@@ -29,7 +29,7 @@ public class Mazo {
 		this.mazo = new Carta[Cant_Cartas];
 		this.tope = Cant_Cartas - 1; //[0,1,2,3,4,...51 (tope)]
 		crearMazo();
-		//barajarMazo();	
+		barajarMazo();	
 	}
 	
 	// *************************************************************

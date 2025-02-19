@@ -123,9 +123,6 @@ public class Controlador implements Observador {
 	public String ganadorJuego() {
 		return this.modelo.getNombreGanadorJuego();
 	}
-
-
-
 	
 	// *************************************************************
 	//                       OBSERVER
@@ -145,6 +142,12 @@ public class Controlador implements Observador {
 				break;
 			case PEDIR_CARTA_PASAJE:
 				this.vista.pedirCartaPasaje();
+				break;
+			case PASAJE_DE_CARTAS_POR_JUGADOR:
+				this.vista.pasajeDeCartasJugador();
+				break;
+			case FIN_PASAJE_DE_CARTAS_POR_JUGADOR:
+				this.vista.finPasajeDeCartasJugador();
 				break;
 			case CARTA_TIRADA_VALIDA_PASAJE:
 				this.vista.cartaTiradaValidaPasaje();

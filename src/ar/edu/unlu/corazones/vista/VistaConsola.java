@@ -469,4 +469,16 @@ public class VistaConsola implements IVista {
 		
 	}
 
+	@Override
+	public void pasajeDeCartasJugador() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void finPasajeDeCartasJugador() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

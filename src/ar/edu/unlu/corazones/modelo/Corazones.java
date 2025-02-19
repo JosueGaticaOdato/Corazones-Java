@@ -72,7 +72,7 @@ public class Corazones implements Observable{
 			repartirCartas();
 			notificar(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			//pasajeDeCartas();
+			pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {
@@ -270,8 +270,10 @@ public class Corazones implements Observable{
 		for (int i = 0; i < cantJugadores; i++) {
 			arregloDeCartasAIntercambiar.add(new Carta[0]);
 		}
-
+		
 		for (Jugador jugadorPasaje : jugadores) {
+			
+			notificar(EventosCorazones.PASAJE_DE_CARTAS_POR_JUGADOR);
 
 			// Obtengo la posicion del jugaodr actual y a quien le va a pasar las cartas
 			int posicionJugadorActual = buscarJugador(jugadorPasaje);
@@ -297,6 +299,8 @@ public class Corazones implements Observable{
 				// Obntego la carta que jugo el jugador
 				jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartasIntercambio[i]));
 			}
+			
+			notificar(EventosCorazones.FIN_PASAJE_DE_CARTAS_POR_JUGADOR);
 
 			turno = (turno + 1) % jugadores.length; // Obtengo el siguiente jugador
 		}
@@ -360,7 +364,6 @@ public class Corazones implements Observable{
 	}
 	
 	// Metodo para jugar la carta cuando se realize el pasaje
-
 	public void jugarCartaPasaje(int i) {
 		cartaAJugar = jugadores[turno].tirarCarta(i);
 	}
@@ -488,7 +491,6 @@ public class Corazones implements Observable{
 	
 	
 	//Me muestro una array con los nombre de todos los jugadores
-	
 	public String[] getListaJugadores() {
 		
 		String[] jugadores = new String[cantJugadores];

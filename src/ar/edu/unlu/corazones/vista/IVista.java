@@ -24,6 +24,10 @@ public interface IVista {
 	void cartaTiradaValidaPasaje();
 	  
 	void finPasajeDeCartas();
+	
+	void pasajeDeCartasJugador();
+
+	void finPasajeDeCartasJugador();
 	 
 	// *************************************************************
 	// 							JUEGO
@@ -61,6 +65,8 @@ public interface IVista {
 	// *************************************************************
 	
 	void setControlador(Controlador controlador);
+
+
 
 
 

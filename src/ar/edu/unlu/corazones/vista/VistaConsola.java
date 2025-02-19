@@ -463,4 +463,10 @@ public class VistaConsola implements IVista {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void nuevaJugada() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

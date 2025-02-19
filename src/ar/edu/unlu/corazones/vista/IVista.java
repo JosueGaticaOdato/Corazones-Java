@@ -14,48 +14,54 @@ public interface IVista {
     //                      PASAJE DE CARTAS
 	// *************************************************************
 	
+	
 	void pasajeDeCartas();
-	
+	  
 	void pedirCartaPasaje();
-	
+	 
 	void cartaTiradaInvalidaPasaje();
 	
 	void cartaTiradaValidaPasaje();
-	
+	  
 	void finPasajeDeCartas();
-
+	 
 	// *************************************************************
-	//                          JUEGO
-	// *************************************************************
+	// 							JUEGO
+	//**************************************************************
 	
+	void nuevaJugada();
+	  
 	void cartasRepartidas();
-
+	  
 	void pedirCarta();
-	
+	  
 	void jugarDosDeTrebol();
-
+	  
 	void cartaTiradaInvalida();
 	
 	void cartaTiradaInvalida2deTrebol();
-	
+	  
 	void perdedorJugada();
-	
+	  
 	void corazonesRotos();
-	
+	  
 	void cartaTiradaValida();
-	
+	  
 	// *************************************************************
-	//                    FIN JUEGO - RONDA
+	//						 FIN JUEGO - RONDA
 	// *************************************************************
-	
+	  
 	void finDeRonda();
-
+	  
 	void finDeJuego();
+	 
 	
 	// *************************************************************
 	//                		 OBSERVER
 	// *************************************************************
 	
 	void setControlador(Controlador controlador);
+
+
 
 }

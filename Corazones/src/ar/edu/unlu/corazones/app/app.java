@@ -10,8 +10,8 @@ public class app {
 
 	public static void main(String[] args) {
 		Corazones modelo = new Corazones();
-		//IVista vista = new VistaConsola();
-		IVista vista = new VistaGrafica();
+		IVista vista = new VistaConsola();
+		//sIVista vista = new VistaGrafica();
 		Controlador controlador = new Controlador(modelo,vista);
 		vista.iniciar();
 	}

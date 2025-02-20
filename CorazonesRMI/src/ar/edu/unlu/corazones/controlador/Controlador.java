@@ -1,17 +1,20 @@
 package ar.edu.unlu.corazones.controlador;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import ar.edu.unlu.corazones.modelo.Carta;
 import ar.edu.unlu.corazones.modelo.Corazones;
 import ar.edu.unlu.corazones.modelo.EventosCorazones;
+import ar.edu.unlu.corazones.modelo.ICorazones;
 import ar.edu.unlu.corazones.observer.Observable;
-import ar.edu.unlu.corazones.observer.Observador;
 import ar.edu.unlu.corazones.vista.IVista;
+import ar.edu.unlu.rmimvc.cliente.IControladorRemoto;
+import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 
-public class Controlador implements Observador {
+public class Controlador implements IControladorRemoto {
 	
-	private Corazones modelo;
+	private ICorazones modelo;
 	
 	private IVista vista;
 	
@@ -19,11 +22,18 @@ public class Controlador implements Observador {
 	//                       CONSTRUCTOR
 	// *************************************************************
 	
-	public Controlador(Corazones modelo, IVista vista) {
-		this.modelo = modelo;
+	public Controlador(ICorazones modelo, IVista vista) throws RemoteException  {
+		//this.modelo = modelo;
 		this.vista = vista;
 		this.vista.setControlador(this);
-		this.modelo.agregarObservador(this);
+		//this.modelo.agregarObservador(this);
+	}
+	
+	public Controlador(IVista vista) throws RemoteException {
+		//this.modelo = modelo;
+		this.vista = vista;
+		this.vista.setControlador(this);
+		//this.modelo.agregarObservador(this);
 	}
 
 	// *************************************************************
@@ -32,95 +42,99 @@ public class Controlador implements Observador {
 
 	// ********************* PRE-JUEGO *****************************
 	
-	public boolean isCantidadJugadoresValida() {
+	public boolean isCantidadJugadoresValida() throws RemoteException  {
 		return modelo.isCantidadJugadoresValida();
 	}
 	
-	public boolean agregarJugador(String nombre) {
+	public boolean agregarJugador(String nombre) throws RemoteException  {
 		return modelo.agregarJugadores(nombre);
 	}
 	
-	public String[] listaJugadores() {
+	public String[] listaJugadores() throws RemoteException  {
 		return modelo.getListaJugadores();
 	}
 	
-	public int cantidadJugadores() {
+	public int cantidadJugadores() throws RemoteException  {
 		return modelo.getCantidadJugadores();
 	}
 	
-	public boolean modificarJugador(String nombre, int pos) {
+	public boolean modificarJugador(String nombre, int pos) throws RemoteException  {
 		return this.modelo.reemplazarJugadores(nombre, pos);
 	}
 	
-	public void iniciarJuego() {
-		this.modelo.iniciarJuego();
+	public void iniciarJuego() throws RemoteException  {
+		try {
+			this.modelo.iniciarJuego();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	// ************************ PASAJE ******************************
 	
-	public String direccionPasaje() {
+	public String direccionPasaje() throws RemoteException  {
 		return this.modelo.getDireccion();
 	}
 	
-	public void cartaJugadaPasaje(int i) {
+	public void cartaJugadaPasaje(int i) throws RemoteException  {
 		this.modelo.setCartaAJugar(i);
 	}
 	
-	public int cantidadCartasPasaje() {
+	public int cantidadCartasPasaje() throws RemoteException  {
 		return this.modelo.getCantCartasIntercambio();
 	}
 	
 	// ************************ JUEGO ******************************
 	
-	public int numeroRonda() {
+	public int numeroRonda() throws RemoteException  {
 		return this.modelo.getRonda();
 	}
 
-	public int numeroJugada() {
+	public int numeroJugada() throws RemoteException  {
 		return this.modelo.getNumeroJugada();
 	}
 	
-	public ArrayList<Carta> manoJugador(int pos){
+	public ArrayList<Carta> manoJugador(int pos) throws RemoteException {
 		return this.modelo.getManoJugador(pos);
 	} 
 	
-	public String nombreJugadorActual() {
+	public String nombreJugadorActual() throws RemoteException  {
 		return this.modelo.getNombreJugadorActual();
 	}
 	
-	public int posicionJugadorActual() {
+	public int posicionJugadorActual() throws RemoteException  {
 		return this.modelo.getPosicionJugadorActual();
 	}
 	
-	public String getJugador(int i) {
+	public String getJugador(int i) throws RemoteException  {
 		return this.modelo.getJugador(i);
 	}
 
-	public void cartaJugada(int i) {
+	public void cartaJugada(int i) throws RemoteException  {
 		this.modelo.setCartaAJugar(i);
 	}
 	
-	public Carta[] cartasEnMesa() {
+	public Carta[] cartasEnMesa() throws RemoteException  {
 		return this.modelo.getCartasEnMesa();
 	}
 	
-	public String jugadorPerdedorJugada() {
+	public String jugadorPerdedorJugada() throws RemoteException  {
 		return this.modelo.getJugadorPerdedorJugada();
 	}
 	
-	public int[] puntajesJugadores() {
+	public int[] puntajesJugadores() throws RemoteException  {
 		return this.modelo.puntajesJugadores();
 	}
 
-	public boolean isCorazonesRotos() {
+	public boolean isCorazonesRotos() throws RemoteException  {
 		return this.modelo.isCorazonesRotos();
 	}
 	
-	public Carta getCartaAJugar() {
+	public Carta getCartaAJugar() throws RemoteException  {
 		return this.modelo.getCartaAJugar();
 	}
 	
-	public String ganadorJuego() {
+	public String ganadorJuego() throws RemoteException  {
 		return this.modelo.getNombreGanadorJuego();
 	}
 	
@@ -129,7 +143,7 @@ public class Controlador implements Observador {
 	// *************************************************************
 
 	@Override
-	public void actualizar(Object evento, Observable observado) {
+	public void actualizar(IObservableRemoto observable, Object evento) throws RemoteException {
 		// TODO Auto-generated method stub
 		if (evento instanceof EventosCorazones) {
 			switch ((EventosCorazones) evento) {
@@ -190,5 +204,11 @@ public class Controlador implements Observador {
 				break;
 			}
 		}
+	}
+	
+	@Override
+	public <T extends IObservableRemoto> void setModeloRemoto(T modelo) throws RemoteException {
+		// TODO Auto-generated method stub
+		this.modelo = (ICorazones) modelo;
 	}
 }

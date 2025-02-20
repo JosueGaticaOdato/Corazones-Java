@@ -1,5 +1,7 @@
 package ar.edu.unlu.corazones.vista;
 
+import java.rmi.RemoteException;
+
 import ar.edu.unlu.corazones.controlador.Controlador;
 
 public interface IVista {
@@ -8,63 +10,63 @@ public interface IVista {
 	//                         PRE-JUEGO
 	// *************************************************************
 	
-	void iniciar();
+	void iniciar() throws RemoteException;
 	
 	// *************************************************************
     //                      PASAJE DE CARTAS
 	// *************************************************************
 	
 	
-	void pasajeDeCartas();
+	void pasajeDeCartas() throws RemoteException;
 	  
-	void pedirCartaPasaje();
+	void pedirCartaPasaje() throws RemoteException;
 	 
-	void cartaTiradaInvalidaPasaje();
+	void cartaTiradaInvalidaPasaje() throws RemoteException;
 	
-	void cartaTiradaValidaPasaje();
+	void cartaTiradaValidaPasaje() throws RemoteException;
 	  
-	void finPasajeDeCartas();
+	void finPasajeDeCartas() throws RemoteException;
 	
-	void pasajeDeCartasJugador();
+	void pasajeDeCartasJugador() throws RemoteException;
 
-	void finPasajeDeCartasJugador();
+	void finPasajeDeCartasJugador() throws RemoteException;
 	 
 	// *************************************************************
 	// 							JUEGO
 	//**************************************************************
 	
-	void nuevaJugada();
+	void nuevaJugada() throws RemoteException;
 	  
-	void cartasRepartidas();
+	void cartasRepartidas() throws RemoteException;
 	  
-	void pedirCarta();
+	void pedirCarta() throws RemoteException;
 	  
-	void jugarDosDeTrebol();
+	void jugarDosDeTrebol() throws RemoteException;
 	  
-	void cartaTiradaInvalida();
+	void cartaTiradaInvalida() throws RemoteException;
 	
-	void cartaTiradaInvalida2deTrebol();
+	void cartaTiradaInvalida2deTrebol() throws RemoteException;
 	  
-	void perdedorJugada();
+	void perdedorJugada() throws RemoteException;
 	  
-	void corazonesRotos();
+	void corazonesRotos() throws RemoteException;
 	  
-	void cartaTiradaValida();
+	void cartaTiradaValida() throws RemoteException;
 	  
 	// *************************************************************
 	//						 FIN JUEGO - RONDA
 	// *************************************************************
 	  
-	void finDeRonda();
+	void finDeRonda() throws RemoteException;
 	  
-	void finDeJuego();
+	void finDeJuego() throws RemoteException;
 	 
 	
 	// *************************************************************
 	//                		 OBSERVER
 	// *************************************************************
 	
-	void setControlador(Controlador controlador);
+	void setControlador(Controlador controlador) throws RemoteException;
 
 
 

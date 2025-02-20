@@ -10,8 +10,10 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,13 +187,41 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		/* LISTENERS DE BOTONES */
-		btnCrearJugador.addActionListener(e -> nuevoJugador());
+		btnCrearJugador.addActionListener(e -> {
+			try {
+				nuevoJugador();
+			} catch (HeadlessException | RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
-		btnModificarJugador.addActionListener(e -> modificarJugador());
+		btnModificarJugador.addActionListener(e -> {
+			try {
+				modificarJugador();
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
-		btnListaJugadores.addActionListener(e -> listarJugadores());
+		btnListaJugadores.addActionListener(e -> {
+			try {
+				listarJugadores();
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
-		btnComenzarJuego.addActionListener(e -> iniciarJuego());
+		btnComenzarJuego.addActionListener(e -> {
+			try {
+				iniciarJuego();
+			} catch (HeadlessException | RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
 		btnSalir.addActionListener(e -> System.exit(0));
 
@@ -216,7 +246,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ************************* ALTA ******************************
 
-	private void nuevoJugador() {
+	private void nuevoJugador() throws HeadlessException, RemoteException {
 		if (!this.controlador.isCantidadJugadoresValida()) {
 
 			String nombre = JOptionPane.showInputDialog(this, "Ingrese el nombre del nuevo jugador:", "Nuevo Jugador",
@@ -242,7 +272,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ********************* MODIFICACION **************************
 
-	private void modificarJugador() {
+	private void modificarJugador() throws RemoteException {
 		String[] jugadores = this.controlador.listaJugadores();
 
 		if (jugadores == null || jugadores.length == 0) {
@@ -284,7 +314,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ******************* LISTA DE JUGADORES *********************
 
-	private void listarJugadores() {
+	private void listarJugadores() throws RemoteException {
 		String[] jugadores = this.controlador.listaJugadores();
 
 		if (jugadores == null || jugadores.length == 0) {
@@ -306,7 +336,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ******************* COMENZAR JUEGO *************************
 
-	private void iniciarJuego() {
+	private void iniciarJuego() throws HeadlessException, RemoteException {
 		if (this.controlador.isCantidadJugadoresValida()) {
 
 			JOptionPane.showMessageDialog(this, "Juego comenzado!", "Juego iniciado", JOptionPane.INFORMATION_MESSAGE);
@@ -322,7 +352,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	//                      PANTALLA JUEGO
 	// *************************************************************
 	
-	private void crearVistaJuego() {
+	private void crearVistaJuego() throws RemoteException {
 		panelJuego = new JPanel(new BorderLayout());
 		panelJuego.setOpaque(false);
 
@@ -360,7 +390,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelPrincipal.add(panelJuego, "juego");
 	}
 
-	private JPanel crearPanelCentro() {
+	private JPanel crearPanelCentro() throws RemoteException {
 	    JPanel panel = new JPanel(new GridBagLayout());
 	    panel.setOpaque(false);
 
@@ -411,7 +441,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	    return panelJugador;
 	}
 	
-	private JPanel crearPanelIzquierdo() {
+	private JPanel crearPanelIzquierdo() throws RemoteException {
 		panelIzquierdo = new JPanel();
 		panelIzquierdo.setOpaque(false);
 		panelIzquierdo.setLayout(new BoxLayout(panelIzquierdo, BoxLayout.Y_AXIS));
@@ -520,13 +550,13 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 	
 	@Override
-	public void pasajeDeCartas() {
+	public void pasajeDeCartas() throws RemoteException {
 		System.out.println("Pasaje");
 		actualizarEstadoJuego("PASAJE DE CARTAS");
 		mostrarMensaje("PASAJE DE CARTAS" + "\n" + direccionPasaje());
 	}
 	
-	public String direccionPasaje() {
+	public String direccionPasaje() throws RemoteException {
 		String s = "No hay pasaje de cartas";
 		String direccion = this.controlador.direccionPasaje();
 		if (direccion != null) {
@@ -542,9 +572,20 @@ public class VistaGrafica extends JFrame implements IVista {
 	@Override
 	public void pasajeDeCartasJugador() {
 		
-		mostrarCartasJugador(this.controlador.manoJugador(this.controlador.posicionJugadorActual()));
+		try {
+			mostrarCartasJugador(this.controlador.manoJugador(this.controlador.posicionJugadorActual()));
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		String jugadorActual = this.controlador.nombreJugadorActual();
+		String jugadorActual = null;
+		try {
+			jugadorActual = this.controlador.nombreJugadorActual();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		String mensaje = "Es el turno del jugador " +  jugadorActual;
 		
@@ -553,14 +594,14 @@ public class VistaGrafica extends JFrame implements IVista {
 	}
 	
 	@Override
-	public void finPasajeDeCartasJugador() {
+	public void finPasajeDeCartasJugador() throws RemoteException {
 		mostrarMensaje("Fin del pasaje de cartas para el jugador " + this.controlador.nombreJugadorActual());
 	}
 	
 	// ****************** PEDIR CARTA (pasaje) *********************
 
 	@Override
-	public void pedirCartaPasaje() {
+	public void pedirCartaPasaje() throws RemoteException {
 		System.out.println("Pedir cartas Pasaje");
 		
 		String mensaje = "Es el turno del jugador " +  this.controlador.nombreJugadorActual();
@@ -593,7 +634,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ************** CARTA TIRADA VALIDA PASAJE *******************
 	
 	@Override
-	public void cartaTiradaValidaPasaje() {	
+	public void cartaTiradaValidaPasaje() throws RemoteException {	
 		Carta cartaAJugar = this.controlador.getCartaAJugar();	
 		marcarCartaPasaje(cartaAJugar);
 	}
@@ -630,7 +671,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ************ CARTA TIRADA INVALIDA PASAJE *******************
 	
 	@Override
-	public void cartaTiradaInvalidaPasaje() {
+	public void cartaTiradaInvalidaPasaje() throws RemoteException {
 		mostrarMensajeError("La carta que seleccioanste es invalida."
 				+ " Por favor, intentalo denuevo.");
 		pedirCartaPasaje();
@@ -652,7 +693,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ****************** ACTUALIZAR DATOS ************************
 
-	private void actualizarJugadaPuntaje() {
+	private void actualizarJugadaPuntaje() throws RemoteException {
 		labelJugada.setText(String.valueOf(this.controlador.numeroJugada()));
 
 		int[] puntajes = this.controlador.puntajesJugadores();
@@ -665,7 +706,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelIzquierdo.repaint();
 	}
 
-	private void actualizarRonda() {
+	private void actualizarRonda() throws RemoteException {
 		labelRonda.setText("Ronda N° " + this.controlador.numeroRonda());
 
 		panelIzquierdo.revalidate();
@@ -692,14 +733,14 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ******** NUEVA JUGADA (ACTUALIZA JUGADA-PUNTOS) ************
 
 	@Override
-	public void nuevaJugada() {
+	public void nuevaJugada() throws RemoteException {
 		actualizarJugadaPuntaje();
 	}
 
 	// ****************** CARTAS REPARTIDAS ************************
 
 	@Override
-	public void cartasRepartidas() {
+	public void cartasRepartidas() throws RemoteException {
 		crearVistaJuego();
 		mostrarVista("juego");
 		System.out.println("cartas repartidas");
@@ -741,7 +782,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ******************** JUGAR DOS DE TREBOL ********************
 
 	@Override
-	public void jugarDosDeTrebol() {
+	public void jugarDosDeTrebol() throws RemoteException {
 		actualizarEstadoJuego("Jugador dos de trebol");
 
 		String jugadorActual = this.controlador.nombreJugadorActual();
@@ -756,7 +797,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ********************** PEDIR CARTA ***************************
 
 	@Override
-	public void pedirCarta() {
+	public void pedirCarta() throws RemoteException {
 		System.out.println("Pedir cartas");
 
 		mostrarCartasJugador(this.controlador.manoJugador(this.controlador.posicionJugadorActual()));
@@ -796,7 +837,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ****************** CARTA TIRADA VALIDA **********************
 
 	@Override
-	public void cartaTiradaValida() {
+	public void cartaTiradaValida() throws RemoteException {
 
 		// Crear la vista de la carta jugada
 		Carta cartaAJugar = this.controlador.getCartaAJugar();
@@ -870,7 +911,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ****************** CARTA TIRADA INVALIDA ********************
 
 	@Override
-	public void cartaTiradaInvalida() {
+	public void cartaTiradaInvalida() throws RemoteException {
 		mostrarMensajeError("La carta que seleccioanste es invalida."
 				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
 				+ "Por favor, intentalo denuevo.");
@@ -878,7 +919,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	}
 
 	@Override
-	public void cartaTiradaInvalida2deTrebol() {
+	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
 		mostrarMensajeError("La carta que seleccioanste es invalida. "
 				+ "Para comenzar el juego si o si tienes que tirar " + "el 2 de Trebol. Por favor, intentalo denuevo.");
 		pedirCarta();
@@ -887,7 +928,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ******************** PERDEDOR JUGADA ************************
 
 	@Override
-	public void perdedorJugada() {
+	public void perdedorJugada() throws RemoteException {
 		mostrarMensajeError("El perdedor de esta jugada es " + this.controlador.jugadorPerdedorJugada() + "\n");
 
 		actualizarJugadaPuntaje();
@@ -934,7 +975,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// 						   PUNTAJE
 	// *************************************************************
 
-	private String puntaje() {
+	private String puntaje() throws RemoteException {
 		String s = "*          PUNTAJE         *" + "\n";
 		s  += "\n";
 		int[] puntajes = this.controlador.puntajesJugadores();
@@ -950,7 +991,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 
 	@Override
-	public void finDeRonda() {
+	public void finDeRonda() throws RemoteException {
 		actualizarEstadoJuego("FIN DE RONDA");
 		mostrarMensaje("FIN DE LA RONDA");
 		mostrarMensaje(puntaje());
@@ -963,7 +1004,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 
 	@Override
-	public void finDeJuego() {
+	public void finDeJuego() throws RemoteException {
 		actualizarEstadoJuego("FIN DEL JUEGO");
 		mostrarMensaje("FIN DEL JUEGO");
 		String jugadorGanador = this.controlador.ganadorJuego();

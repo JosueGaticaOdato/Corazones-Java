@@ -1,12 +1,14 @@
 package ar.edu.unlu.corazones.modelo;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.unlu.corazones.observer.Observable;
 import ar.edu.unlu.corazones.observer.Observador;
+import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
-public class Corazones implements Observable{
+public class Corazones extends ObservableRemoto implements ICorazones{
 
 	// *************************************************************
 	// 						CONSTANTES
@@ -63,14 +65,15 @@ public class Corazones implements Observable{
 	// 						COMPORTAMIENTO
 	// ************************************************************
 	
-	public void iniciarJuego() {
+	@Override
+	public void iniciarJuego() throws RemoteException {
 		boolean juegoTerminado = false;
 		resetPuntajes();
 		
 		while (!juegoTerminado) {
 			mazo = new Mazo();
 			repartirCartas();
-			notificar(EventosCorazones.CARTAS_REPARTIDAS);
+			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
 			pasajeDeCartas();
 			this.corazonesRotos = false;
@@ -80,7 +83,7 @@ public class Corazones implements Observable{
 				int i = 0;
 				Jugada jugada = new Jugada(this.jugadores);
 				jugadas.add(jugada);
-				notificar(EventosCorazones.NUEVA_JUGADA);
+				notificarObservadores(EventosCorazones.NUEVA_JUGADA);
 				
 				/*CASO 2 DE TREBOL*/
 				if (j == 0) {
@@ -90,13 +93,13 @@ public class Corazones implements Observable{
 				
 				/*1 JUGADA POR CADA JUGADOR*/
 				while (i < cantJugadores) {
-					notificar(EventosCorazones.PEDIR_CARTA);
+					notificarObservadores(EventosCorazones.PEDIR_CARTA);
 					jugarCarta(jugada);
 					i++;
 				}
 				
 				turno = jugada.determinarPerdedor();
-				notificar(EventosCorazones.PERDEDOR_JUGADA);
+				notificarObservadores(EventosCorazones.PERDEDOR_JUGADA);
 				
 			}
 
@@ -104,13 +107,13 @@ public class Corazones implements Observable{
 			if (puntajeMaximoActual() >= puntajeMaximo) {
 				juegoTerminado = true;
 			}
-			notificar(EventosCorazones.FIN_DE_RONDA);
+			notificarObservadores(EventosCorazones.FIN_DE_RONDA);
 			Jugada.reiniciarContadorJugadas();
 			ronda++;
 		}
 		
 		determinarGanador();
-		notificar(EventosCorazones.FIN_DE_JUEGO);
+		notificarObservadores(EventosCorazones.FIN_DE_JUEGO);
 	}
 	
 	// *************************************************************
@@ -156,7 +159,7 @@ public class Corazones implements Observable{
 	// *************************************************************
 	
 	//Para comenzar la ronda es necesario que el jugador que tiene el dos de trebol comience
-	private void primerCarta2Trebol(Jugada jugada)  {
+	private void primerCarta2Trebol(Jugada jugada) throws RemoteException  {
 		boolean tengoDosDeTrebol = false;
 		int pos = 0;
 		while (!tengoDosDeTrebol && pos < cantJugadores) {
@@ -165,7 +168,7 @@ public class Corazones implements Observable{
 			tengoDosDeTrebol = jugadores[pos].tengoDosDeTrebol();
 			if (tengoDosDeTrebol) {
 				turno = pos;
-				notificar(EventosCorazones.JUGAR_2_DE_TREBOL);
+				notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
 				boolean dosDeTrebolTirado = false;
 				
 				//Hasta que no tire el dos de trebol no arranca el juego!
@@ -174,13 +177,13 @@ public class Corazones implements Observable{
 					if (jugada.tirarDosDeTrebol(cartaAJugar, turno) && (cartaAJugar != null)) {
 						
 						jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
-						notificar(EventosCorazones.CARTA_TIRADA_VALIDA);
+						notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
 						turno = (turno + 1) % cantJugadores;
 						dosDeTrebolTirado = true;
 						
 					} else {
 						
-						notificar(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
+						notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
 					}
 					
 				}
@@ -191,7 +194,7 @@ public class Corazones implements Observable{
 		}
 	}
 	
-	private void jugarCarta(Jugada jugada)  {
+	private void jugarCarta(Jugada jugada) throws RemoteException  {
 		
 		boolean cartaTiradaValida = false;
 		while ( !cartaTiradaValida ) {
@@ -199,13 +202,13 @@ public class Corazones implements Observable{
 			if (jugada.tirarCartaEnMesa(turno, cartaAJugar, this.corazonesRotos) && (cartaAJugar != null)) {
 				jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
 				tiroCorazones();
-				notificar(EventosCorazones.CARTA_TIRADA_VALIDA);
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
 				turno = (turno + 1) % cantJugadores;
 				cartaTiradaValida = true;
 				
 			} else {
 				
-				notificar(EventosCorazones.CARTA_TIRADA_INVALIDA);
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA);
 				
 			}
 		}
@@ -213,9 +216,9 @@ public class Corazones implements Observable{
 	}
 	
 	// Metodo para indicar que un jugador tiro la carta de corazones
-	private void tiroCorazones()  {
+	private void tiroCorazones() throws RemoteException  {
 		if (cartaAJugar.getPalo() == Palo.CORAZONES && !this.corazonesRotos) {
-			notificar(EventosCorazones.CORAZONES_ROTOS);
+			notificarObservadores(EventosCorazones.CORAZONES_ROTOS);
 			this.corazonesRotos = true;
 		}
 	}
@@ -224,7 +227,7 @@ public class Corazones implements Observable{
 	// 					    PASAJE DE CARTAS
 	// *************************************************************
 	
-	private void pasajeDeCartas()  {
+	private void pasajeDeCartas() throws RemoteException  {
 		int variablePasaje = 0;
 		
 		// *************************************************************
@@ -254,14 +257,14 @@ public class Corazones implements Observable{
 			break;
 		}
 		
-		notificar(EventosCorazones.PASAJE_DE_CARTAS);
+		notificarObservadores(EventosCorazones.PASAJE_DE_CARTAS);
 		if (variablePasaje != 0) {
 			intercambioDeCartas(variablePasaje);
-			notificar(EventosCorazones.FIN_PASAJE_DE_CARTAS);
+			notificarObservadores(EventosCorazones.FIN_PASAJE_DE_CARTAS);
 		}
 	}
 	
-	private void intercambioDeCartas(int valor)  {
+	private void intercambioDeCartas(int valor) throws RemoteException  {
 		// Esto funciona para que el intercambio se haga sobre el final y los otros
 		// jugadores no tengan acceso a las cartas nuevas recibidas
 		ArrayList<Carta[]> arregloDeCartasAIntercambiar = new ArrayList<Carta[]>(cantJugadores);
@@ -273,7 +276,7 @@ public class Corazones implements Observable{
 		
 		for (Jugador jugadorPasaje : jugadores) {
 			
-			notificar(EventosCorazones.PASAJE_DE_CARTAS_POR_JUGADOR);
+			notificarObservadores(EventosCorazones.PASAJE_DE_CARTAS_POR_JUGADOR);
 
 			// Obtengo la posicion del jugaodr actual y a quien le va a pasar las cartas
 			int posicionJugadorActual = buscarJugador(jugadorPasaje);
@@ -288,7 +291,7 @@ public class Corazones implements Observable{
 
 			for (int i = 0; i < cantCartasIntercambio; i++) {
 				// Obntego la carta que jugo el jugador
-				notificar(EventosCorazones.PEDIR_CARTA_PASAJE);
+				notificarObservadores(EventosCorazones.PEDIR_CARTA_PASAJE);
 				cartaTiradaValidaPasaje(cartasIntercambio);
 				cartasIntercambio[i] = this.cartaAJugar;
 			}
@@ -300,7 +303,7 @@ public class Corazones implements Observable{
 				jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartasIntercambio[i]));
 			}
 			
-			notificar(EventosCorazones.FIN_PASAJE_DE_CARTAS_POR_JUGADOR);
+			notificarObservadores(EventosCorazones.FIN_PASAJE_DE_CARTAS_POR_JUGADOR);
 
 			turno = (turno + 1) % jugadores.length; // Obtengo el siguiente jugador
 		}
@@ -308,7 +311,7 @@ public class Corazones implements Observable{
 		otorgarCartasJugadores(arregloDeCartasAIntercambiar);
 	}
 	
-	private void cartaTiradaValidaPasaje(Carta[] cartasIntercambio)  {
+	private void cartaTiradaValidaPasaje(Carta[] cartasIntercambio) throws RemoteException  {
 		
 		boolean cartaTiradaValida = false;
 		while ( !cartaTiradaValida ) {
@@ -316,9 +319,9 @@ public class Corazones implements Observable{
 			if ((cartaAJugar != null) && (!buscarCarta(cartasIntercambio, cartaAJugar))) {
 				//jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
 				cartaTiradaValida = true;
-				notificar(EventosCorazones.CARTA_TIRADA_VALIDA_PASAJE);
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA_PASAJE);
 			} else {
-				notificar(EventosCorazones.CARTA_TIRADA_INVALIDA_PASAJE);
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_PASAJE);
 			}
 		}
 		
@@ -338,8 +341,7 @@ public class Corazones implements Observable{
 		return encontrada;
 		
 	}
-	
-	
+		
 	// Metodo que busca la posicion de un jugador determinado
 	private int buscarJugador(Jugador jugador) {
 		int posicionJugadorBuscar = 0;
@@ -364,6 +366,7 @@ public class Corazones implements Observable{
 	}
 	
 	// Metodo para jugar la carta cuando se realize el pasaje
+	@Override
 	public void jugarCartaPasaje(int i) {
 		cartaAJugar = jugadores[turno].tirarCarta(i);
 	}
@@ -372,6 +375,7 @@ public class Corazones implements Observable{
 	// 						ALTA Y MODIFICACION
 	// *************************************************************
 	
+	@Override
 	public boolean agregarJugadores(String nombre)  {
 		boolean hayEspacio = false;
 		int pos = 0;
@@ -386,6 +390,7 @@ public class Corazones implements Observable{
 		return hayEspacio;
 	}
 	
+	@Override
 	public boolean reemplazarJugadores(String nombre,int posicion)  {
 		boolean seReemplazo = false;
 		if (posicion >= 0 && posicion <= cantJugadores) {
@@ -401,46 +406,47 @@ public class Corazones implements Observable{
 	//                      GETTERS
 	// *************************************************************
 	
+	@Override
 	public Mazo getMazo()  {
 		return mazo;
 	}
-
 	
+	@Override
 	public Jugador[] getJugadores() {
 		return jugadores;
 	}
 
-	
+	@Override
 	public int getRonda()  {
 		return ronda;
 	}
-
 	
+	@Override
 	public List<Jugada> getJugadas()  {
 		return jugadas;
 	}
-
 	
+	@Override
 	public String getDireccion()  {
 		return String.valueOf(direccion);
 	}
-
 	
+	@Override
 	public Carta getCartaAJugar()  {
 		return cartaAJugar;
 	}
-
 	
+	@Override
 	public boolean isCorazonesRotos()  {
 		return corazonesRotos;
 	}
-	
-	
+		
+	@Override
 	public int getCantidadJugadores()  {
 		return cantJugadores;
 	}
-	
-	
+		
+	@Override
 	public int getCantCartasIntercambio()  {
 		return cantCartasIntercambio;
 	}
@@ -450,35 +456,37 @@ public class Corazones implements Observable{
 	// *************************************************************
 	
 	
+	@Override
 	public String getJugador(int i)  {
 		return jugadores[i].getNombre();
 	}
 	
+	@Override
 	public String getNombreJugadorActual()  {
 		return jugadores[turno].getNombre();
 	}
 	
-	
+	@Override
 	public int getPosicionJugadorActual()  {
 		return turno;
 	}
 	
-	
+	@Override
 	public Carta[] getCartasEnMesa() {
 		return this.jugadas.get(jugadas.size() - 1).getCartasJugadas();
 	}
 	
-	
+	@Override
 	public String getJugadorPerdedorJugada()  {
 		return this.jugadas.get(jugadas.size() - 1).getJugadorPerdedor().getNombre();
-	}
+	}	
 	
-	
+	@Override
 	public int getNumeroJugada()  {
 		return this.jugadas.get(jugadas.size()-1).getNumeroJugada();
 	}
 	
-	
+	@Override
 	public boolean isCantidadJugadoresValida()  {
 	    int jugadoresRegistrados = 0;
 	    for (Object jugador : getJugadores()) {
@@ -489,8 +497,8 @@ public class Corazones implements Observable{
 	    return jugadoresRegistrados == getCantidadJugadores();
 	}
 	
-	
 	//Me muestro una array con los nombre de todos los jugadores
+	@Override
 	public String[] getListaJugadores() {
 		
 		String[] jugadores = new String[cantJugadores];
@@ -504,12 +512,12 @@ public class Corazones implements Observable{
 		return jugadores;
 	}
 	
-	
+	@Override
 	public ArrayList<Carta> getManoJugador(int pos)  {
 		return this.jugadores[pos].getMano();
 	}
 	
-	
+	@Override
 	public int[] puntajesJugadores()  {
 		int[] puntajes = new int[cantJugadores];
 		for (int i = 0; i < cantJugadores; i++) {
@@ -518,7 +526,7 @@ public class Corazones implements Observable{
 		return puntajes;
 	}
 	
-	
+	@Override
 	public String getNombreGanadorJuego() {
 		return this.jugadorGanador.getNombre();
 	}
@@ -527,7 +535,7 @@ public class Corazones implements Observable{
 	//                      SETTERS
 	// *************************************************************
 	
-	
+	@Override
 	public void setCartaAJugar(int pos)  {
 		cartaAJugar = jugadores[turno].obtenerCartaJugador(pos);
 	}
@@ -536,7 +544,7 @@ public class Corazones implements Observable{
 	//					 MVC Y OBSERVER
 	// *************************************************************
 
-	@Override
+	/*@Override
 	public void notificar(Object evento) {
 		for (Observador observador : this.observadores) {
 			observador.actualizar(evento, this);
@@ -546,5 +554,5 @@ public class Corazones implements Observable{
 	@Override
 	public void agregarObservador(Observador observador) {
 		this.observadores.add(observador);
-	}
+	}*/
 }

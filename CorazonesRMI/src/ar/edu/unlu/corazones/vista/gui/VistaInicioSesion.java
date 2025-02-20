@@ -10,12 +10,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import net.miginfocom.swing.MigLayout;
+
 public class VistaInicioSesion extends JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField textUsuario;
 	private JButton btnIniciar;
@@ -31,6 +29,7 @@ public class VistaInicioSesion extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+		contentPane.setLayout(new MigLayout("", "[][grow]", "[][]"));
 		
 		JLabel lblUsuario = new JLabel("Usuario");
 		contentPane.add(lblUsuario, "cell 0 0,alignx trailing");
@@ -49,8 +48,7 @@ public class VistaInicioSesion extends JFrame {
 		this.btnIniciar.addActionListener(listener);
 	}
 	
-	public String getNombre() {
+	public String getGetNombreUsuario() {
 		return this.textUsuario.getText();
 	}
-
 }

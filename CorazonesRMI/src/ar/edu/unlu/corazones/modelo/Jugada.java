@@ -21,17 +21,17 @@ public class Jugada {
 	private int numeroJugada;
 
 	//Vector aparedeado para vincular jugador-carta
-	private Jugador[] jugadores; 
+	private IJugador[] jugadores; 
 	private Carta[] cartasJugadas;
 	
 	private Carta primeraCartaJugada;
-	private Jugador jugadorPerdedor;
+	private IJugador jugadorPerdedor;
 	
 	// *************************************************************
 	//                       CONSTRUCTOR
 	// *************************************************************
 	
-	public Jugada(Jugador[] jugadores) {
+	public Jugada(IJugador[] jugadores) {
 		setJugadores(jugadores);
 		cartasJugadas = new Carta[cartasEnMesa];
 		contadorJugadas++;
@@ -44,7 +44,7 @@ public class Jugada {
 	
 	public boolean tirarCartaEnMesa(int turnoProx, Carta cartaEnJuego, boolean corazonesRotos) {
 		boolean isCartaValida = true;
-		Jugador jugador = jugadores[turnoProx];
+		IJugador jugador = jugadores[turnoProx];
 		
 		/*Si es la primera carta, existes dos casos:
 		- El primero, que sea una carta de corazones y quiera iniciar jugada sin que esten los corazones rotos: Eso es invalido
@@ -165,7 +165,7 @@ public class Jugada {
 		return numeroJugada;
 	}
 
-	public Jugador[] getJugadores() {
+	public IJugador[] getJugadores() {
 		return jugadores;
 	}
 
@@ -177,7 +177,7 @@ public class Jugada {
 		return primeraCartaJugada;
 	}
 
-	public Jugador getJugadorPerdedor() {
+	public IJugador getJugadorPerdedor() {
 		return jugadorPerdedor;
 	}
 	
@@ -191,7 +191,7 @@ public class Jugada {
 	}
 
 
-	public void setJugadores(Jugador[] jugadores) {
+	public void setJugadores(IJugador[] jugadores) {
 		this.jugadores = jugadores;
 	}
 
@@ -206,7 +206,7 @@ public class Jugada {
 	}
 
 
-	public void setJugadorPerdedor(Jugador jugadorPerdedor) {
+	public void setJugadorPerdedor(IJugador jugadorPerdedor) {
 		this.jugadorPerdedor = jugadorPerdedor;
 	}
 	

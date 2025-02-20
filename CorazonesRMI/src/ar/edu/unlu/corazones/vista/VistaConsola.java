@@ -138,12 +138,12 @@ public class VistaConsola implements IVista {
 			int opcion = this.entrada.nextInt();
 			limpiarPantalla();
 			switch (opcion) {
-				case 1: //Crear jugador
+				/*case 1: //Crear jugador
 					nuevoJugador();
 					break;
 				case 2: //Modificar jugador por posicion
 					modificarJugador();
-					break;
+					break;*/
 				case 3: //Mostrar lista de jugadores 
 					listaJugadores();
 					break;
@@ -169,8 +169,8 @@ public class VistaConsola implements IVista {
 		System.out.println();
 		System.out.println("Seleccione una opcion:");
 		System.out.println("----------------------");
-		System.out.println("1 - Crear jugador");
-		System.out.println("2 - Modificar jugador");
+		//System.out.println("1 - Crear jugador");
+		//System.out.println("2 - Modificar jugador");
 		System.out.println("3 - Ver lista de jugadores");
 		System.out.println("4 - Comenzar juego");
 		System.out.println("----------------------");
@@ -181,7 +181,7 @@ public class VistaConsola implements IVista {
 	
 	// ************************* ALTA ******************************
 	
-	private void nuevoJugador() throws RemoteException {
+	/*private void nuevoJugador() throws RemoteException {
 		if (!this.controlador.isCantidadJugadoresValida()) {
 			System.out.println("\n" + "---------- NUEVO JUGADOR! -------------" + "\n");
 			System.out.print("Ingrese el nombre del nuevo jugador: ");
@@ -217,7 +217,7 @@ public class VistaConsola implements IVista {
 		} else {
 			System.out.println("No se pudo modificar el jugador.");
 		}
-	}
+	}*/
 	
 	// ******************* LISTA DE JUGADORES  *********************
 	

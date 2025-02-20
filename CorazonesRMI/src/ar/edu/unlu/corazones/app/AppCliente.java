@@ -7,7 +7,6 @@ import javax.swing.JOptionPane;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.vista.IVista;
-import ar.edu.unlu.corazones.vista.VistaConsola;
 import ar.edu.unlu.corazones.vista.VistaGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.Util;
@@ -52,8 +51,8 @@ public class AppCliente {
 				8888
 		);*/
 		//IVista vista = new VistaConsola();
-		IVista vista = new VistaGrafica();
-		Controlador controlador = new Controlador(vista);
+		Controlador controlador = new Controlador();
+		IVista vista = new VistaGrafica(controlador);
 		Cliente c = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
 		vista.iniciar();
 		try {

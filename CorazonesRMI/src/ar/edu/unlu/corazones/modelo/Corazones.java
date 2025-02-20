@@ -2,18 +2,19 @@ package ar.edu.unlu.corazones.modelo;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
-import ar.edu.unlu.corazones.observer.Observable;
 import ar.edu.unlu.corazones.observer.Observador;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
-public class Corazones extends ObservableRemoto implements ICorazones{
+public class Corazones extends ObservableRemoto implements ICorazones {
 
 	// *************************************************************
 	// 						CONSTANTES
 	// *************************************************************
-
+	
 	private static final int cantCartasRepartidas = 13; // TESTING (13)
 	private static final int cantCartasIntercambio = 2; // TESTING (3)
 	private static final int puntajeMaximo = 1; // TESTING (100)
@@ -25,7 +26,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	
 	private Mazo mazo;
 	
-	private Jugador[] jugadores;
+	private HashMap<Integer, Jugador> jugadores;
 	
 	private int ronda;
 	
@@ -37,7 +38,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	
 	private Carta cartaAJugar;
 	
-	private Jugador jugadorGanador;
+	private IJugador jugadorGanador;
 	
 	private boolean corazonesRotos;
 	
@@ -48,17 +49,25 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	// *************************************************************
 	
 	public Corazones() {
-		jugadores = new Jugador[cantJugadores];
+		this.jugadores = new HashMap<>();
 		ronda = 1;
-		
-		// Jugadores por defecto
-		agregarJugadores("Jugador A");
-		agregarJugadores("Jugador B");
-		agregarJugadores("Jugador C");
-		agregarJugadores("Jugador D");
 
 		this.observadores = new ArrayList<>();
 		this.jugadas = new ArrayList<>();
+	}
+	
+	// *************************************************************
+	// 				     AGREGAR/ELIMINAR JUGADORES
+	// ************************************************************
+	
+	public IJugador conectarJugador(String nombre) throws RemoteException {
+		Jugador j = new Jugador(nombre);
+		this.jugadores.put(j.getId(), j);
+		return j;
+	}
+	
+	public void desconectarJugador(int jugadorId) throws RemoteException {
+		this.jugadores.remove(jugadorId);
 	}
 	
 	// *************************************************************
@@ -81,7 +90,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 			for (int j = 0; j < cantCartasRepartidas; j++) {
 				
 				int i = 0;
-				Jugada jugada = new Jugada(this.jugadores);
+				Jugada jugada = new Jugada(getJugadores());
 				jugadas.add(jugada);
 				notificarObservadores(EventosCorazones.NUEVA_JUGADA);
 				
@@ -120,23 +129,23 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	// 					FUNCIONALIDAD RONDA
 	// *************************************************************
 	
-	private void resetPuntajes() {
-		for (Jugador jugadoresCorazones : jugadores ) {
+	private void resetPuntajes() throws RemoteException {
+		for (IJugador jugadoresCorazones : getJugadores() ) {
 			jugadoresCorazones.setPuntaje(0);
 		}
 	}
 	
-	private void repartirCartas() {
+	private void repartirCartas() throws RemoteException {
 		for (int i = 0; i < cantCartasRepartidas; i++) {
-			for (Jugador jugador : jugadores) {
+			for (IJugador jugador : getJugadores()) {
 				jugador.recibirCarta(mazo.sacarCarta());
 			}
 		}
 	}
 	
-	private int puntajeMaximoActual() {
+	private int puntajeMaximoActual() throws RemoteException {
 		int max = 0;
-		for (Jugador jugadoresCorazones : jugadores) {
+		for (IJugador jugadoresCorazones : getJugadores()) {
 			if (max <= jugadoresCorazones.getPuntaje()) {
 				max = jugadoresCorazones.getPuntaje();
 			}
@@ -144,12 +153,12 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 		return max;
 	}
 	
-	private void determinarGanador() {
+	private void determinarGanador() throws RemoteException {
 		int minPuntaje = 100;
 		for (int i = 0; i < cantJugadores; i++) {
-			if (minPuntaje >= jugadores[i].getPuntaje()) {
-				minPuntaje = jugadores[i].getPuntaje();
-				this.jugadorGanador = jugadores[i];
+			if (minPuntaje >= getJugadores()[i].getPuntaje()) {
+				minPuntaje = getJugadores()[i].getPuntaje();
+				this.jugadorGanador = getJugadores()[i];
 			}
 		}
 	}
@@ -165,7 +174,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 		while (!tengoDosDeTrebol && pos < cantJugadores) {
 			
 			//Obtengo al jugador que tiene el 2 de trebol
-			tengoDosDeTrebol = jugadores[pos].tengoDosDeTrebol();
+			tengoDosDeTrebol = getJugadores()[pos].tengoDosDeTrebol();
 			if (tengoDosDeTrebol) {
 				turno = pos;
 				notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
@@ -176,7 +185,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 					
 					if (jugada.tirarDosDeTrebol(cartaAJugar, turno) && (cartaAJugar != null)) {
 						
-						jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
+						getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
 						notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
 						turno = (turno + 1) % cantJugadores;
 						dosDeTrebolTirado = true;
@@ -200,7 +209,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 		while ( !cartaTiradaValida ) {
 			
 			if (jugada.tirarCartaEnMesa(turno, cartaAJugar, this.corazonesRotos) && (cartaAJugar != null)) {
-				jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
+				getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
 				tiroCorazones();
 				notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
 				turno = (turno + 1) % cantJugadores;
@@ -274,7 +283,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 			arregloDeCartasAIntercambiar.add(new Carta[0]);
 		}
 		
-		for (Jugador jugadorPasaje : jugadores) {
+		for (IJugador jugadorPasaje : getJugadores()) {
 			
 			notificarObservadores(EventosCorazones.PASAJE_DE_CARTAS_POR_JUGADOR);
 
@@ -284,7 +293,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 			// Para saber a quien le paso las cartas, tengo que sumar la variable de pasaje
 			// a la posicion del jugador actual, y a eso dividirlo por la cantidad de
 			// jugadores
-			int posicionJugadorPasaje = (posicionJugadorActual + valor + jugadores.length) % jugadores.length;
+			int posicionJugadorPasaje = (posicionJugadorActual + valor + getJugadores().length) % getJugadores().length;
 
 			// Creo la lista de las cartas que se van a pasar al otro jugador
 			Carta[] cartasIntercambio = new Carta[cantCartasIntercambio];
@@ -300,12 +309,12 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 			arregloDeCartasAIntercambiar.set(posicionJugadorPasaje, cartasIntercambio);
 			for (int i = 0; i < cantCartasIntercambio; i++) {
 				// Obntego la carta que jugo el jugador
-				jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartasIntercambio[i]));
+				getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartasIntercambio[i]));
 			}
 			
 			notificarObservadores(EventosCorazones.FIN_PASAJE_DE_CARTAS_POR_JUGADOR);
 
-			turno = (turno + 1) % jugadores.length; // Obtengo el siguiente jugador
+			turno = (turno + 1) % getJugadores().length; // Obtengo el siguiente jugador
 		}
 
 		otorgarCartasJugadores(arregloDeCartasAIntercambiar);
@@ -343,11 +352,11 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	}
 		
 	// Metodo que busca la posicion de un jugador determinado
-	private int buscarJugador(Jugador jugador) {
+	private int buscarJugador(IJugador jugador) throws RemoteException {
 		int posicionJugadorBuscar = 0;
 		boolean encontrado = false;
-		while (!encontrado && posicionJugadorBuscar < jugadores.length) {
-			if (jugadores[posicionJugadorBuscar] == jugador) {
+		while (!encontrado && posicionJugadorBuscar < getJugadores().length) {
+			if (getJugadores()[posicionJugadorBuscar] == jugador) {
 				encontrado = true;
 			} else {
 				posicionJugadorBuscar++;
@@ -357,25 +366,25 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	}
 	
 	// Otorgo las cartas que se pasaron a cada jugador
-	private void otorgarCartasJugadores(ArrayList<Carta[]> cartasPasaje) {
+	private void otorgarCartasJugadores(ArrayList<Carta[]> cartasPasaje) throws RemoteException {
 		for (int i = 0; i < cantJugadores; i++) {
 			for (int j = 0; j < cantCartasIntercambio; j++) {
-				jugadores[i].recibirCarta(cartasPasaje.get(i)[j]);
+				getJugadores()[i].recibirCarta(cartasPasaje.get(i)[j]);
 			}
 		}
 	}
 	
 	// Metodo para jugar la carta cuando se realize el pasaje
 	@Override
-	public void jugarCartaPasaje(int i) {
-		cartaAJugar = jugadores[turno].tirarCarta(i);
+	public void jugarCartaPasaje(int i) throws RemoteException {
+		cartaAJugar = getJugadores()[turno].tirarCarta(i);
 	}
 	
 	// *************************************************************
 	// 						ALTA Y MODIFICACION
 	// *************************************************************
 	
-	@Override
+	/*@Override
 	public boolean agregarJugadores(String nombre)  {
 		boolean hayEspacio = false;
 		int pos = 0;
@@ -400,7 +409,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 			}
 		}
 		return seReemplazo;
-	}
+	}*/
 	
 	// *************************************************************
 	//                      GETTERS
@@ -412,8 +421,9 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	}
 	
 	@Override
-	public Jugador[] getJugadores() {
-		return jugadores;
+	public Jugador[] getJugadores() throws RemoteException {
+		Jugador[] jugadores = new Jugador[this.jugadores.size()];
+		return this.jugadores.values().toArray(jugadores);
 	}
 
 	@Override
@@ -457,13 +467,13 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	
 	
 	@Override
-	public String getJugador(int i)  {
-		return jugadores[i].getNombre();
+	public String getJugador(int i) throws RemoteException  {
+		return getJugadores()[i].getNombre();
 	}
 	
 	@Override
-	public String getNombreJugadorActual()  {
-		return jugadores[turno].getNombre();
+	public String getNombreJugadorActual() throws RemoteException  {
+		return getJugadores()[turno].getNombre();
 	}
 	
 	@Override
@@ -487,7 +497,7 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	}
 	
 	@Override
-	public boolean isCantidadJugadoresValida()  {
+	public boolean isCantidadJugadoresValida() throws RemoteException  {
 	    int jugadoresRegistrados = 0;
 	    for (Object jugador : getJugadores()) {
 	        if (jugador != null) {
@@ -499,29 +509,34 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	
 	//Me muestro una array con los nombre de todos los jugadores
 	@Override
-	public String[] getListaJugadores() {
-		
-		String[] jugadores = new String[cantJugadores];
-		for (int i = 0; i < cantJugadores; i++) {
-			if (this.jugadores[i] != null) {				
-				jugadores[i] = this.jugadores[i].getNombre();
-			} else {
-				jugadores[i] = null;
-			}
-		}
-		return jugadores;
+	public String[] getListaJugadores() throws RemoteException {
+	    String[] nombresJugadores = new String[cantJugadores]; 
+
+	    // Recorrer los jugadores según sus claves
+	    List<Integer> clavesOrdenadas = new ArrayList<>(jugadores.keySet());
+
+	    for (int i = 0; i < cantJugadores; i++) {
+	        if (i < clavesOrdenadas.size()) {
+	            int clave = clavesOrdenadas.get(i);
+	            nombresJugadores[i] = jugadores.get(clave).getNombre();
+	        } else {
+	            nombresJugadores[i] = null; // Espaciio vacio si no hay jugadores
+	        }
+	    }
+	    
+	    return nombresJugadores;
 	}
 	
 	@Override
-	public ArrayList<Carta> getManoJugador(int pos)  {
-		return this.jugadores[pos].getMano();
+	public ArrayList<Carta> getManoJugador(int pos) throws RemoteException  {
+		return this.getJugadores()[pos].getMano();
 	}
 	
 	@Override
-	public int[] puntajesJugadores()  {
+	public int[] puntajesJugadores() throws RemoteException  {
 		int[] puntajes = new int[cantJugadores];
 		for (int i = 0; i < cantJugadores; i++) {
-			puntajes[i] = this.jugadores[i].getPuntaje();
+			puntajes[i] = this.getJugadores()[i].getPuntaje();
 		}
 		return puntajes;
 	}
@@ -536,8 +551,8 @@ public class Corazones extends ObservableRemoto implements ICorazones{
 	// *************************************************************
 	
 	@Override
-	public void setCartaAJugar(int pos)  {
-		cartaAJugar = jugadores[turno].obtenerCartaJugador(pos);
+	public void setCartaAJugar(int pos) throws RemoteException  {
+		cartaAJugar = getJugadores()[turno].obtenerCartaJugador(pos);
 	}
 	
 	// *************************************************************

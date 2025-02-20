@@ -13,9 +13,10 @@ import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.modelo.Carta;
 import ar.edu.unlu.corazones.vista.gui.FondoTapete;
 import ar.edu.unlu.corazones.vista.gui.VistaCarta;
+import ar.edu.unlu.corazones.vista.gui.VistaInicioSesion;
 
 public class VistaGrafica extends JFrame implements IVista {
 	
@@ -65,6 +67,10 @@ public class VistaGrafica extends JFrame implements IVista {
 	private Controlador controlador;
 
 	private CardLayout cardLayout;
+	
+	// **************** PANEL INICIAR SESION  **********************
+	
+	private VistaInicioSesion vInicioSesion;
 
 	// ********************* PANEL MENU ****************************
 
@@ -91,13 +97,16 @@ public class VistaGrafica extends JFrame implements IVista {
 	private JPanel panelInferior;
 	private JPanel contenedorCartas;
 
-	private Map<String, Point> posicionesJugadores = new HashMap<>();;
+	private Map<String, Point> posicionesJugadores = new HashMap<>();
 
 	// *************************************************************
 	//							CONSTRUCTOR
 	// *************************************************************
 
-	public VistaGrafica() {
+	public VistaGrafica(Controlador controlador) {
+		
+		this.controlador = controlador;
+		this.controlador.setVista(this);
 
 		/* CONFIGURACIONES DE VENTANA */
 		setTitle("Corazones");
@@ -110,6 +119,16 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelPrincipal = new FondoTapete("/ar/edu/unlu/corazones/img/tapete.jpg");
 		panelPrincipal.setLayout(cardLayout);
 		setContentPane(panelPrincipal);
+		
+		/* VISTA INICIO DE SESION */
+		this.vInicioSesion = new VistaInicioSesion();
+		this.vInicioSesion.onClickIniciar(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				controlador.conectarJugador(vInicioSesion.getGetNombreUsuario());
+				iniciarMenu();
+			}
+		});
 	}
 
 	// *************************************************************
@@ -139,10 +158,16 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	@Override
 	public void iniciar() {
+		this.vInicioSesion.setVisible(true);
+	}
+	
+	public void iniciarMenu() {
 		crearMenu();
+		this.vInicioSesion.setVisible(false);
 		setVisible(true);
 		mostrarVista("menu");
 	}
+	
 
 	private void crearMenu() {
 		panelMenu = new JPanel();
@@ -172,14 +197,16 @@ public class VistaGrafica extends JFrame implements IVista {
 
 		// Agregar los botones y darles un espaciado
 		int espaciado = 20;
-		panelBotones.add(Box.createVerticalStrut(espaciado));
+		/*panelBotones.add(Box.createVerticalStrut(espaciado));
 		panelBotones.add(btnCrearJugador);
 		panelBotones.add(Box.createVerticalStrut(espaciado));
 		panelBotones.add(btnModificarJugador);
-		panelBotones.add(Box.createVerticalStrut(espaciado));
-		panelBotones.add(btnListaJugadores);
+		*/
+		
 		panelBotones.add(Box.createVerticalStrut(espaciado));
 		panelBotones.add(btnComenzarJuego);
+		panelBotones.add(Box.createVerticalStrut(espaciado));
+		panelBotones.add(btnListaJugadores);
 		panelBotones.add(Box.createVerticalStrut(espaciado));
 		panelBotones.add(btnSalir);
 
@@ -187,7 +214,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		/* LISTENERS DE BOTONES */
-		btnCrearJugador.addActionListener(e -> {
+		/*btnCrearJugador.addActionListener(e -> {
 			try {
 				nuevoJugador();
 			} catch (HeadlessException | RemoteException e1) {
@@ -203,7 +230,7 @@ public class VistaGrafica extends JFrame implements IVista {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		});
+		});*/
 
 		btnListaJugadores.addActionListener(e -> {
 			try {
@@ -223,7 +250,14 @@ public class VistaGrafica extends JFrame implements IVista {
 			}
 		});
 
-		btnSalir.addActionListener(e -> System.exit(0));
+		btnSalir.addActionListener(e -> {
+			try {
+				desconectarJugador();
+				System.exit(0);
+			} catch (RemoteException e1) {
+				e1.printStackTrace();
+			} 
+		});
 
 		// Panel de botones en el centro de la pantalla
 		JPanel contenedorBotones = new JPanel();
@@ -246,7 +280,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	// ************************* ALTA ******************************
 
-	private void nuevoJugador() throws HeadlessException, RemoteException {
+	/*private void nuevoJugador() throws HeadlessException, RemoteException {
 		if (!this.controlador.isCantidadJugadoresValida()) {
 
 			String nombre = JOptionPane.showInputDialog(this, "Ingrese el nombre del nuevo jugador:", "Nuevo Jugador",
@@ -268,11 +302,11 @@ public class VistaGrafica extends JFrame implements IVista {
 			JOptionPane.showMessageDialog(this, "Ya están todos los jugadores inscritos.", "Límite Alcanzado",
 					JOptionPane.WARNING_MESSAGE);
 		}
-	}
+	}*/
 
 	// ********************* MODIFICACION **************************
 
-	private void modificarJugador() throws RemoteException {
+	/*private void modificarJugador() throws RemoteException {
 		String[] jugadores = this.controlador.listaJugadores();
 
 		if (jugadores == null || jugadores.length == 0) {
@@ -310,7 +344,11 @@ public class VistaGrafica extends JFrame implements IVista {
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
-	}
+	}*/
+	
+	// ******************* AGREGAR JUGADOR ************************
+	
+	
 
 	// ******************* LISTA DE JUGADORES *********************
 
@@ -332,6 +370,12 @@ public class VistaGrafica extends JFrame implements IVista {
 		}
 
 		JOptionPane.showMessageDialog(this, lista.toString(), "Lista de Jugadores", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	// ****************** JUGADOR DESCONECTADO ***********************
+	
+	private void desconectarJugador() throws RemoteException {
+		controlador.desconectarJugador();
 	}
 
 	// ******************* COMENZAR JUEGO *************************

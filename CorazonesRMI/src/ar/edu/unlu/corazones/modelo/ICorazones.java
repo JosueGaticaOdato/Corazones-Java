@@ -11,14 +11,18 @@ public interface ICorazones extends IObservableRemoto{
 	void iniciarJuego() throws RemoteException;
 
 	void jugarCartaPasaje(int i) throws RemoteException;
+	
+	IJugador conectarJugador(String nombre) throws RemoteException;
+	
+	void desconectarJugador(int jugadorId) throws RemoteException;
 
-	boolean agregarJugadores(String nombre) throws RemoteException;
+	/*boolean agregarJugadores(String nombre) throws RemoteException;
 
-	boolean reemplazarJugadores(String nombre, int posicion) throws RemoteException;
+	boolean reemplazarJugadores(String nombre, int posicion) throws RemoteException;*/
 
 	Mazo getMazo() throws RemoteException;
 
-	Jugador[] getJugadores() throws RemoteException;
+	IJugador[] getJugadores() throws RemoteException;
 
 	int getRonda() throws RemoteException;
 

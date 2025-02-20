@@ -1,11 +1,15 @@
 package ar.edu.unlu.corazones.modelo;
 
-public class Carta {
+import java.io.Serializable;
+
+public class Carta implements Serializable {
 	
 	// *************************************************************
 	//                        ATRIBUTOS
 	// *************************************************************
 	
+	private static final long serialVersionUID = 1L;
+
 	private Palo palo;
 	
 	private int valor;

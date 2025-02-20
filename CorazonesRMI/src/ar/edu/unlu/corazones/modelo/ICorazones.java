@@ -55,6 +55,8 @@ public interface ICorazones extends IObservableRemoto{
 	String[] getListaJugadores() throws RemoteException;
 
 	ArrayList<Carta> getManoJugador(int pos) throws RemoteException;
+	
+	ArrayList<Carta> getManoJugador(String nombreJugador) throws RemoteException;
 
 	int[] puntajesJugadores() throws RemoteException;
 

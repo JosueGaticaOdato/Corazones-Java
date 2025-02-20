@@ -135,6 +135,10 @@ public class Controlador implements IControladorRemoto {
 		return this.modelo.getManoJugador(pos);
 	} 
 	
+	public ArrayList <Carta> manoJugador(String nombreJugador)  throws RemoteException {
+		return this.modelo.getManoJugador(nombreJugador);
+	}
+	
 	public String nombreJugadorActual() throws RemoteException  {
 		return this.modelo.getNombreJugadorActual();
 	}
@@ -213,16 +217,16 @@ public class Controlador implements IControladorRemoto {
 				this.vista.nuevaJugada();
 				break;	
 			case PEDIR_CARTA:
-				this.vista.pedirCarta();
+				this.vista.pedirCarta(this.nombreJugadorActual());
 				break;
 			case JUGAR_2_DE_TREBOL:
-				this.vista.jugarDosDeTrebol();
+				this.vista.jugarDosDeTrebol(this.nombreJugadorActual());
 				break;
 			case CARTA_TIRADA_INVALIDA:
-				this.vista.cartaTiradaInvalida();
+				this.vista.cartaTiradaInvalida(this.nombreJugadorActual());
 				break;
 			case CARTA_TIRADA_INVALIDA_2_DE_TREBOL:
-				this.vista.cartaTiradaInvalida2deTrebol();
+				this.vista.cartaTiradaInvalida2deTrebol(this.nombreJugadorActual());
 				break;
 			case PERDEDOR_JUGADA:
 				this.vista.perdedorJugada();

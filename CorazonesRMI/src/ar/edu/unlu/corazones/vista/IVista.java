@@ -39,13 +39,13 @@ public interface IVista {
 	  
 	void cartasRepartidas() throws RemoteException;
 	  
-	void pedirCarta() throws RemoteException;
+	void pedirCarta(String jugadorActual) throws RemoteException;
 	  
-	void jugarDosDeTrebol() throws RemoteException;
+	void jugarDosDeTrebol(String jugadorActual) throws RemoteException;
 	  
-	void cartaTiradaInvalida() throws RemoteException;
+	void cartaTiradaInvalida(String jugadorActual) throws RemoteException;
 	
-	void cartaTiradaInvalida2deTrebol() throws RemoteException;
+	void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException;
 	  
 	void perdedorJugada() throws RemoteException;
 	  

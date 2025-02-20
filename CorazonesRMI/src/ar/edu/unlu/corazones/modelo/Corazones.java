@@ -84,7 +84,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			pasajeDeCartas();
+			//pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {
@@ -138,6 +138,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	private void repartirCartas() throws RemoteException {
 		for (int i = 0; i < cantCartasRepartidas; i++) {
 			for (IJugador jugador : getJugadores()) {
+				System.out.println(jugador);
 				jugador.recibirCarta(mazo.sacarCarta());
 			}
 		}
@@ -530,6 +531,16 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	@Override
 	public ArrayList<Carta> getManoJugador(int pos) throws RemoteException  {
 		return this.getJugadores()[pos].getMano();
+	}
+	
+	@Override
+	public ArrayList<Carta> getManoJugador(String nombreJugador) throws RemoteException  {
+		for (Jugador jugador : jugadores.values()) {
+	        if (jugador.getNombre().equals(nombreJugador)) {
+	            return jugador.getMano();
+	        }
+	    }
+		return new ArrayList<>();
 	}
 	
 	@Override

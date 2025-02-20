@@ -15,7 +15,7 @@ import ar.edu.unlu.rmimvc.cliente.Cliente;
 public class AppCliente {
 
 	public static void main(String[] args) throws RemoteException {
-		ArrayList<String> ips = Util.getIpDisponibles();
+		/*ArrayList<String> ips = Util.getIpDisponibles();
 		String ip = (String) JOptionPane.showInputDialog(
 				null, 
 				"Seleccione la IP en la que escuchar� peticiones el cliente", "IP del cliente", 
@@ -23,7 +23,8 @@ public class AppCliente {
 				null,
 				ips.toArray(),
 				null
-		);
+		);*/
+		String ip = "127.0.0.1";
 		String port = (String) JOptionPane.showInputDialog(
 				null, 
 				"Seleccione el puerto en el que escuchar� peticiones el cliente", "Puerto del cliente", 

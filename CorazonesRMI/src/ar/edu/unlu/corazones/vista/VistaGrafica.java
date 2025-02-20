@@ -71,6 +71,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	// **************** PANEL INICIAR SESION  **********************
 	
 	private VistaInicioSesion vInicioSesion;
+	private String nombreJugador;
 
 	// ********************* PANEL MENU ****************************
 
@@ -125,6 +126,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		this.vInicioSesion.onClickIniciar(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				nombreJugador = vInicioSesion.getGetNombreUsuario();
 				controlador.conectarJugador(vInicioSesion.getGetNombreUsuario());
 				iniciarMenu();
 			}
@@ -168,7 +170,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		mostrarVista("menu");
 	}
 	
-
 	private void crearMenu() {
 		panelMenu = new JPanel();
 		panelMenu.setLayout(new BorderLayout());
@@ -189,8 +190,8 @@ public class VistaGrafica extends JFrame implements IVista {
 		int botonAncho = 200;
 		int botonAlto = 40;
 
-		JButton btnCrearJugador = crearBoton("Crear jugador", botonAncho, botonAlto);
-		JButton btnModificarJugador = crearBoton("Modificar jugador", botonAncho, botonAlto);
+		//JButton btnCrearJugador = crearBoton("Crear jugador", botonAncho, botonAlto);
+		//JButton btnModificarJugador = crearBoton("Modificar jugador", botonAncho, botonAlto);
 		JButton btnListaJugadores = crearBoton("Ver lista de jugadores", botonAncho, botonAlto);
 		JButton btnComenzarJuego = crearBoton("Comenzar juego", botonAncho, botonAlto);
 		JButton btnSalir = crearBoton("Salir", botonAncho, botonAlto);
@@ -278,77 +279,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		return boton;
 	}
 
-	// ************************* ALTA ******************************
-
-	/*private void nuevoJugador() throws HeadlessException, RemoteException {
-		if (!this.controlador.isCantidadJugadoresValida()) {
-
-			String nombre = JOptionPane.showInputDialog(this, "Ingrese el nombre del nuevo jugador:", "Nuevo Jugador",
-					JOptionPane.PLAIN_MESSAGE);
-
-			if (nombre != null && !nombre.trim().isEmpty()) {
-
-				this.controlador.agregarJugador(nombre);
-				JOptionPane.showMessageDialog(this, "Jugador agregado con éxito.", "Éxito",
-						JOptionPane.INFORMATION_MESSAGE);
-
-			} else {
-
-				JOptionPane.showMessageDialog(this, "El nombre del jugador no puede estar vacio.", "Error",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		} else {
-
-			JOptionPane.showMessageDialog(this, "Ya están todos los jugadores inscritos.", "Límite Alcanzado",
-					JOptionPane.WARNING_MESSAGE);
-		}
-	}*/
-
-	// ********************* MODIFICACION **************************
-
-	/*private void modificarJugador() throws RemoteException {
-		String[] jugadores = this.controlador.listaJugadores();
-
-		if (jugadores == null || jugadores.length == 0) {
-			JOptionPane.showMessageDialog(this, "No hay jugadores registrados para modificar.", "Error",
-					JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
-		String seleccion = (String) JOptionPane.showInputDialog(this, "Seleccione el jugador a modificar:",
-				"Modificar Jugador", JOptionPane.QUESTION_MESSAGE, null, jugadores, jugadores[0]);
-
-		if (seleccion != null) {
-
-			int pos = Arrays.asList(jugadores).indexOf(seleccion) + 1; // Obtengo la posicion en el arreglo
-
-			String nuevoNombre = JOptionPane.showInputDialog(this, "Ingrese el nuevo nombre para el jugador:",
-					"Modificar Jugador", JOptionPane.PLAIN_MESSAGE);
-			if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) {
-
-				boolean modificado = controlador.modificarJugador(nuevoNombre, pos);
-
-				if (modificado) {
-					JOptionPane.showMessageDialog(this, "Jugador modificado con éxito.", "Éxito",
-							JOptionPane.INFORMATION_MESSAGE);
-
-				} else {
-
-					JOptionPane.showMessageDialog(this, "No se pudo modificar el jugador.", "Error",
-							JOptionPane.ERROR_MESSAGE);
-
-				}
-			} else {
-
-				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío.", "Error",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}*/
-	
-	// ******************* AGREGAR JUGADOR ************************
-	
-	
 
 	// ******************* LISTA DE JUGADORES *********************
 
@@ -384,7 +314,15 @@ public class VistaGrafica extends JFrame implements IVista {
 		if (this.controlador.isCantidadJugadoresValida()) {
 
 			JOptionPane.showMessageDialog(this, "Juego comenzado!", "Juego iniciado", JOptionPane.INFORMATION_MESSAGE);
-			controlador.iniciarJuego();
+			//controlador.iniciarJuego();
+			//Lo ejecuto en un hilo separado para no bloquear la vista
+			new Thread(() -> {
+	            try {
+	                controlador.iniciarJuego();
+	            } catch (RemoteException e) {
+	                e.printStackTrace();
+	            }
+	        }).start();
 		} else {
 
 			JOptionPane.showMessageDialog(this, "Faltan jugadores para comenzar el juego", "Jugadores insuficientes",
@@ -567,9 +505,9 @@ public class VistaGrafica extends JFrame implements IVista {
 		panel.setOpaque(false);
 		panel.setPreferredSize(new Dimension(150, 150));
 		panel.setBorder(
-				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2), " Mano del jugador ",
+				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2), " " + vInicioSesion.getGetNombreUsuario() + " ",
 						TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, this.tamañoFuentes[0]), Color.WHITE));
-		panel.setName("Nombre del jugador");
+		panel.setName(vInicioSesion.getGetNombreUsuario());
 
 		// Contenedor para las cartas
 		contenedorCartas = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
@@ -617,7 +555,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void pasajeDeCartasJugador() {
 		
 		try {
-			mostrarCartasJugador(this.controlador.manoJugador(this.controlador.posicionJugadorActual()));
+			mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -634,12 +572,12 @@ public class VistaGrafica extends JFrame implements IVista {
 		String mensaje = "Es el turno del jugador " +  jugadorActual;
 		
 		actualizarEstadoJuego("Turno de " + jugadorActual);
-		mostrarMensaje(mensaje);
+		//mostrarMensaje(mensaje);
 	}
 	
 	@Override
 	public void finPasajeDeCartasJugador() throws RemoteException {
-		mostrarMensaje("Fin del pasaje de cartas para el jugador " + this.controlador.nombreJugadorActual());
+		//mostrarMensaje("Fin del pasaje de cartas para el jugador " + this.controlador.nombreJugadorActual());
 	}
 	
 	// ****************** PEDIR CARTA (pasaje) *********************
@@ -789,6 +727,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		mostrarVista("juego");
 		System.out.println("cartas repartidas");
 		actualizarEstadoJuego("Cartas repartidas!");
+		mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 	}
 
 	private void mostrarCartasJugador(ArrayList<Carta> cartas) {
@@ -826,42 +765,41 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ******************** JUGAR DOS DE TREBOL ********************
 
 	@Override
-	public void jugarDosDeTrebol() throws RemoteException {
-		actualizarEstadoJuego("Jugador dos de trebol");
+	public void jugarDosDeTrebol(String jugadorActual) throws RemoteException {
+		actualizarEstadoJuego("Jugador dos de trebol - " + jugadorActual);
 
-		String jugadorActual = this.controlador.nombreJugadorActual();
-
-		JOptionPane.showMessageDialog(this,
+		/*JOptionPane.showMessageDialog(this,
 				"Comienza la ronda el jugador " + jugadorActual + " ya que tiene el 2 de trebol", "Comienzo de ronda",
-				JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.INFORMATION_MESSAGE);*/
 
-		pedirCarta();
+		pedirCarta(jugadorActual);
 	}
 
 	// ********************** PEDIR CARTA ***************************
 
 	@Override
-	public void pedirCarta() throws RemoteException {
-		System.out.println("Pedir cartas");
-
-		mostrarCartasJugador(this.controlador.manoJugador(this.controlador.posicionJugadorActual()));
+	public void pedirCarta(String jugadorActual) throws RemoteException {
 		
-		String jugadorActual = this.controlador.nombreJugadorActual();
-
-		String mensaje = "Es el turno del jugador " + jugadorActual;
-
-		actualizarEstadoJuego("Turno de " + jugadorActual);
-
-		mostrarMensaje(mensaje);
-
-		int indiceCarta = mostrarSeleccionCarta(mensaje);
-
-		if (indiceCarta >= 0) {
-			System.out.println(indiceCarta);
-			controlador.cartaJugada(indiceCarta);
-		} else {
-			mostrarMensajeError("Selección inválida. Intente nuevamente.");
-			pedirCarta(); // Volver a pedir si el índice no es válido
+		if (vInicioSesion.getGetNombreUsuario() == jugadorActual) {
+			System.out.println("Pedir cartas");
+	
+			mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
+	
+			String mensaje = "Es el turno del jugador " + jugadorActual;
+	
+			actualizarEstadoJuego("Turno de " + jugadorActual);
+	
+			mostrarMensaje(mensaje);
+	
+			int indiceCarta = mostrarSeleccionCarta(mensaje);
+	
+			if (indiceCarta >= 0) {
+				System.out.println(indiceCarta);
+				controlador.cartaJugada(indiceCarta);
+			} else {
+				mostrarMensajeError("Selección inválida. Intente nuevamente.");
+				pedirCarta(jugadorActual); // Volver a pedir si el índice no es válido
+			}
 		}
 	}
 
@@ -955,18 +893,18 @@ public class VistaGrafica extends JFrame implements IVista {
 	// ****************** CARTA TIRADA INVALIDA ********************
 
 	@Override
-	public void cartaTiradaInvalida() throws RemoteException {
+	public void cartaTiradaInvalida(String jugadorActual) throws RemoteException {
 		mostrarMensajeError("La carta que seleccioanste es invalida."
 				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
 				+ "Por favor, intentalo denuevo.");
-		pedirCarta();
+		pedirCarta(this.controlador.nombreJugadorActual());
 	}
 
 	@Override
-	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
+	public void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException {
 		mostrarMensajeError("La carta que seleccioanste es invalida. "
 				+ "Para comenzar el juego si o si tienes que tirar " + "el 2 de Trebol. Por favor, intentalo denuevo.");
-		pedirCarta();
+		pedirCarta(this.controlador.nombreJugadorActual());
 	}
 
 	// ******************** PERDEDOR JUGADA ************************

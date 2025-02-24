@@ -28,8 +28,16 @@ public class VistaConsola implements IVista {
 	// *************************************************************
 	
 	//Creo la instancia para que el usuario pueda ingresar los datos
-	public VistaConsola() {
+	public VistaConsola(Controlador controlador) {
 		this.entrada = new Scanner(System.in);
+		this.controlador = controlador;
+		this.controlador.setVista(this);
+		
+		/* Control de desconexiones por parte del jugador */
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+		    controlador.desconectarJugador();
+		    System.out.println("Jugador desconectado correctamente.");
+		}));
 	}
 	
 	// *************************************************************
@@ -52,7 +60,6 @@ public class VistaConsola implements IVista {
 	 }
 	}
 	
-
 	private void combinacionRondaJugada() throws RemoteException {
 		puntaje();
 		System.out.println("****************************");
@@ -106,8 +113,7 @@ public class VistaConsola implements IVista {
 		System.out.println();
 		System.out.println("****************************");
 	}
-	
-	
+		
 	private void manoJugador() throws RemoteException {
 		System.out.println();
 		System.out.println("     	    MANO            ");
@@ -123,7 +129,6 @@ public class VistaConsola implements IVista {
 		System.out.println();
 		System.out.println();
 	}
-
 	
 	// *************************************************************
 	//                         PRE-JUEGO
@@ -131,6 +136,7 @@ public class VistaConsola implements IVista {
 	
 	@Override
 	public void iniciar() throws RemoteException {
+		conectarJugador();
 		boolean salir = false;
 		while(!salir) {
 			limpiarPantalla();
@@ -138,21 +144,15 @@ public class VistaConsola implements IVista {
 			int opcion = this.entrada.nextInt();
 			limpiarPantalla();
 			switch (opcion) {
-				/*case 1: //Crear jugador
-					nuevoJugador();
-					break;
-				case 2: //Modificar jugador por posicion
-					modificarJugador();
-					break;*/
-				case 3: //Mostrar lista de jugadores 
+				case 1: //Mostrar lista de jugadores 
 					listaJugadores();
 					break;
-				case 4: //Comenzar juego
+				case 2: //Comenzar juego
 					jugar();
 					break;
 				case 0: //Salir del juego
 					salir = true;
-					System.out.println("Gracias por jugar!!");
+					desconectarJugador();
 					break;
 				default: //Opcion por default
 					System.out.println("Opcion no valida.");
@@ -169,55 +169,13 @@ public class VistaConsola implements IVista {
 		System.out.println();
 		System.out.println("Seleccione una opcion:");
 		System.out.println("----------------------");
-		//System.out.println("1 - Crear jugador");
-		//System.out.println("2 - Modificar jugador");
-		System.out.println("3 - Ver lista de jugadores");
-		System.out.println("4 - Comenzar juego");
+		System.out.println("1 - Ver lista de jugadores");
+		System.out.println("2 - Comenzar juego");
 		System.out.println("----------------------");
 		System.out.println();
 		System.out.println("0 - Salir");
 		System.out.print("Opcion: ");
 	}
-	
-	// ************************* ALTA ******************************
-	
-	/*private void nuevoJugador() throws RemoteException {
-		if (!this.controlador.isCantidadJugadoresValida()) {
-			System.out.println("\n" + "---------- NUEVO JUGADOR! -------------" + "\n");
-			System.out.print("Ingrese el nombre del nuevo jugador: ");
-			String nombre = entrada.next();
-			
-			if (nombre != null && !nombre.trim().isEmpty()) {
-				
-				this.controlador.agregarJugador(nombre);
-				System.out.println("Jugador agregado con éxito.");
-				
-			} else {
-				
-				System.out.println("El nombre del jugador no puede estar vacio");
-			}
-			
-		} else {
-			System.out.println("\n" + "Ya estan todos los jugadores inscriptos" + "\n");
-		}
-	}
-
-	// ********************* MODIFICACION **************************
-	
-	private void modificarJugador() throws RemoteException {
-		listaJugadores();
-		System.out.print("Por favor, ingrese el numero de jugador que quiere modificar: ");
-		int pos = entrada.nextInt();
-		System.out.print("Ingrese el nuevo nombre para el jugador: ");
-		String nombre = entrada.next();
-		
-		boolean creado = controlador.modificarJugador(nombre, pos);
-		if (creado) {
-			System.out.println("Jugador modificado con exito!");
-		} else {
-			System.out.println("No se pudo modificar el jugador.");
-		}
-	}*/
 	
 	// ******************* LISTA DE JUGADORES  *********************
 	
@@ -237,6 +195,41 @@ public class VistaConsola implements IVista {
 		System.out.println(s);
 	}
 	
+	// ****************** JUGADOR DESCONECTADO *********************
+	
+	@Override
+	public void desconectarJugador() throws RemoteException{
+		controlador.desconectarJugador();
+		System.out.println("Jugador desconectado correctamente.");
+	}
+	
+	// ******************** CONECTAR JUGADOR ***********************
+	
+	private boolean conectarJugador() throws RemoteException{
+		boolean jugadorConectado = false;
+		if (!this.controlador.isCantidadJugadoresValida()) {
+			
+			System.out.println("\n" + "---------- NUEVO JUGADOR! -------------" + "\n");
+			System.out.print("Ingrese el nombre del nuevo jugador: ");
+			String nombre = entrada.next();
+		
+			if (nombre != null && !nombre.trim().isEmpty()) {
+			
+				this.controlador.conectarJugador(nombre);
+				System.out.println("Jugador agregado con éxito.");
+				jugadorConectado = true;
+			
+			} else {
+			
+				System.out.println("El nombre del jugador no puede estar vacio");
+			}
+		
+		} else {
+			System.out.println("\n" + "Ya estan todos los jugadores inscriptos" + "\n");
+		}
+		return jugadorConectado;
+	}
+	
 	// *************************************************************
 	//                         JUGAR
 	// *************************************************************
@@ -250,236 +243,118 @@ public class VistaConsola implements IVista {
 			System.out.println("Faltan jugadores para comenzar el juego");
 		}
 	}
-	
-	// *************************************************************
-	//                    PASAJE DE CARTAS
-	// *************************************************************
-	
-	// ******************** PASAJE DE CARTAS ***********************
-	
+
 	@Override
 	public void pasajeDeCartas() throws RemoteException {
-		combinacionRondaPasaje();
-		System.out.println(direccionPasaje());
-		continuar();
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public String direccionPasaje() throws RemoteException {
-		String s = "No hay pasaje de cartas";
-		String direccion = this.controlador.direccionPasaje();
-		if (direccion != null) {
-			s = "Las cartas se pasan en la siguiente direccion: " + direccion + "\n";
-			s += "Cantidad de cartas a pasar: " + String.valueOf(this.controlador.cantidadCartasPasaje());
-		}
-		return s;
 
-	}
-	
-	// ****************** PEDIR CARTA (pasaje) *********************
-	
 	@Override
 	public void pedirCartaPasaje() throws RemoteException {
-		combinacionRondaPasaje();
-		System.out.println("Es el turno del jugador: "
-				+ this.controlador.nombreJugadorActual()); //Digo quien tiene que jugar
-		continuar();
-		combinacionRondaPasaje();
-		turnoJugador();
-		manoJugador();
-		int posCarta;
-		System.out.print("Elija una carta: ");
+		// TODO Auto-generated method stub
 		
-		try {
-			posCarta = entrada.nextInt();
-		} catch (Exception e) {
-			posCarta = -1;
-		}
-		
-		controlador.cartaJugadaPasaje(posCarta - 1);
-		continuar();
 	}
-	
-	// ************ CARTA TIRADA INVALIDA PASAJE *******************
-	
+
 	@Override
 	public void cartaTiradaInvalidaPasaje() throws RemoteException {
-		System.out.println("La carta que seleccioanste es invalida."
-				+ " Por favor, intentalo denuevo.");
-		continuar();
-		pedirCartaPasaje();
-	}
-	
-	// ****************** FIN PASAJE DE CARTAS *********************
-	
-	@Override
-	public void finPasajeDeCartas() {
-		System.out.println("****************************");
-		System.out.println("* FIN DEL PASAJE DE CARTAS *");
-		System.out.println("*    COMIENZA LA RONDA     *");
-		System.out.println("****************************");
-		continuar();
-	}
-	
-	// *************************************************************
-	//                         JUEGO
-	// *************************************************************
-	
-	// ************ PEDIR CARTAS (para tirar en mesa) **************
-	
-	@Override
-	public void pedirCarta() throws RemoteException {
 		// TODO Auto-generated method stub
-		combinacionRondaJugada();
-		System.out.println("Es el turno del jugador: "
-				+ this.controlador.nombreJugadorActual()); //Digo quien tiene que jugar
-		continuar();
-		combinacionRondaJugada();
-		turnoJugador();
-		cartasEnMesa();
-		if (this.controlador.isCorazonesRotos()) {
-			System.out.println("*     ¡CORAZONES ROTOS!    *");
-		}
-		manoJugador();
-		int posCarta;
-		System.out.print("Elija una carta: ");
 		
-		try {
-			posCarta = entrada.nextInt();
-		} catch (Exception e) {
-			posCarta = -1;
-		}
-		
-		controlador.cartaJugada(posCarta - 1); //Paso la carta
-		continuar();
 	}
 
-	// ******************** JUGAR DOS DE TREBOL ********************
-	
 	@Override
-	public void jugarDosDeTrebol() throws RemoteException {
+	public void cartaTiradaValidaPasaje() throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("Como es la primer jugada, el jugador " + this.controlador.nombreJugadorActual() +
-				" debe iniciar el juego tirando el 2 de Trebol");
-		continuar();
-		pedirCarta();
+		
 	}
-	
-	// ****************** CARTA TIRADA INVALIDA ********************
-	
+
 	@Override
-	public void cartaTiradaInvalida() throws RemoteException {
+	public void finPasajeDeCartas() throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("La carta que seleccioanste es invalida."
-				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
-				+ "Por favor, intentalo denuevo.");
-		continuar();
-		pedirCarta();
+		
 	}
-	
+
 	@Override
-	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
+	public void pasajeDeCartasJugador() throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("La carta que seleccioanste es invalida. Para comenzar el juego si o si tienes que tirar el 2 de Trebol. Por favor, intentalo denuevo.");
-		continuar();
-		pedirCarta();
+		
 	}
-	
-	// ******************** PERDEDOR JUGADA ************************
-	
+
+	@Override
+	public void finPasajeDeCartasJugador() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void nuevaJugada() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cartasRepartidas() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pedirCarta(String jugadorActual) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void jugarDosDeTrebol(String jugadorActual) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cartaTiradaInvalida(String jugadorActual) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public void perdedorJugada() throws RemoteException {
-		combinacionRondaJugada();
-		cartasEnMesa();
+		// TODO Auto-generated method stub
 		
-		System.out.println("El perdedor de esta jugada es " + this.controlador.jugadorPerdedorJugada() + "\n");
-		
-		continuar();
-	}
-	
-	// ******************** CORAZONES ROTOS ************************
-	
-	@Override
-	public void corazonesRotos() {
-		System.out.println("\n" + "CORAZONES ROTOS");
-		System.out.println("A partir de ahora se pueden tirar corazones" + "\n");
-		continuar();
 	}
 
-	// *************************************************************
-	//              		 FIN DE RONDA
-	// *************************************************************
-	
 	@Override
-	public void finDeRonda() throws RemoteException{ 
-		System.out.println("****************************");
-		System.out.println("* 	   FIN DE LA RONDA	   *");
-		System.out.println("****************************");
-		System.out.println("Asi estan los puntajes hasta el momento" + "\n");
-		puntaje();
-		continuar();
+	public void corazonesRotos() throws RemoteException {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	// *************************************************************
-	//              		 FIN DE JUEGO
-	// *************************************************************
-	
+
+	@Override
+	public void cartaTiradaValida() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void finDeRonda() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public void finDeJuego() throws RemoteException {
-		System.out.println("****************************");
-		System.out.println("*  		FIN DEL JUEGO      *");
-		System.out.println("****************************");
-		puntaje();
-		System.out.println("El ganador fue " + this.controlador.ganadorJuego());
-		System.out.println("¡¡¡FELICIDADES!!!");
-	}
-	
-	
-	// *************************************************************
-	//                		 OBSERVER
-	// *************************************************************
-
-	@Override
-	public void setControlador(Controlador controlador) {
-		// TODO Auto-generated method stub
-		this.controlador = controlador;
-	}
-	
-	
-	// *************************************************************
-	//            METODOS SIN UTILIZAR POR EL MOMENTO
-	// *************************************************************
-
-	@Override
-	public void cartasRepartidas() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void cartaTiradaValida() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void cartaTiradaValidaPasaje() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void nuevaJugada() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void pasajeDeCartasJugador() {
+	public void setControlador(Controlador controlador) throws RemoteException {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void finPasajeDeCartasJugador() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

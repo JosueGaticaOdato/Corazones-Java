@@ -12,6 +12,8 @@ public interface IVista {
 	
 	void iniciar() throws RemoteException;
 	
+	void desconectarJugador() throws RemoteException;
+	
 	// *************************************************************
     //                      PASAJE DE CARTAS
 	// *************************************************************

@@ -22,26 +22,11 @@ public class Controlador implements IControladorRemoto {
 	// *************************************************************
 	//                       CONSTRUCTOR
 	// *************************************************************
-	
-	/*public Controlador(ICorazones modelo, IVista vista) throws RemoteException  {
-		//this.modelo = modelo;
-		this.vista = vista;
-		this.vista.setControlador(this);
-		//this.modelo.agregarObservador(this);
-	}
-	
-	public Controlador(IVista vista) throws RemoteException {
-		//this.modelo = modelo;
-		this.vista = vista;
-		this.vista.setControlador(this);
-		//this.modelo.agregarObservador(this);
-	}*/
-	
+
 	public <T extends IObservableRemoto> Controlador(T modelo) {
 		try {
 			this.setModeloRemoto(modelo);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -71,7 +56,6 @@ public class Controlador implements IControladorRemoto {
 	public void desconectarJugador() {
 		try {
 			this.modelo.desconectarJugador(this.jugador.getId());
-			//this.modelo.desconectarJugador(usuarioId);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}	
@@ -83,10 +67,6 @@ public class Controlador implements IControladorRemoto {
 		return modelo.isCantidadJugadoresValida();
 	}
 	
-	/*public boolean agregarJugador(String nombre) throws RemoteException  {
-		return modelo.agregarJugadores(nombre);
-	}*/
-	
 	public String[] listaJugadores() throws RemoteException  {
 		return modelo.getListaJugadores();
 	}
@@ -94,10 +74,6 @@ public class Controlador implements IControladorRemoto {
 	public int cantidadJugadores() throws RemoteException  {
 		return modelo.getCantidadJugadores();
 	}
-	
-	/*public boolean modificarJugador(String nombre, int pos) throws RemoteException  {
-		return this.modelo.reemplazarJugadores(nombre, pos);
-	}*/
 	
 	public void iniciarJuego() throws RemoteException  {
 		try {

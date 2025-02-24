@@ -1,15 +1,14 @@
 package ar.edu.unlu.corazones.app;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.vista.IVista;
+import ar.edu.unlu.corazones.vista.VistaConsola;
 import ar.edu.unlu.corazones.vista.VistaGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
-import ar.edu.unlu.rmimvc.Util;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
 
 public class AppCliente {
@@ -54,12 +53,13 @@ public class AppCliente {
 		//IVista vista = new VistaConsola();
 		Controlador controlador = new Controlador();
 		IVista vista = new VistaGrafica(controlador);
-		Cliente c = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));
-		vista.iniciar();
+		//IVista vista = new VistaConsola(controlador);
+		Cliente c = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));	
 		try {
 			System.out.println("Iniciando controlador remoto...");
 			c.iniciar(controlador);
 			System.out.println("Controlador remoto inciado");
+			vista.iniciar();
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

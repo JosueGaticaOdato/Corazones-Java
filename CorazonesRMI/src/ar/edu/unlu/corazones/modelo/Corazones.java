@@ -378,37 +378,6 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	}
 	
 	// *************************************************************
-	// 						ALTA Y MODIFICACION
-	// *************************************************************
-	
-	/*@Override
-	public boolean agregarJugadores(String nombre)  {
-		boolean hayEspacio = false;
-		int pos = 0;
-		while (!hayEspacio && pos < jugadores.length) {
-			if (jugadores[pos] == null) {
-				jugadores[pos] = new Jugador(nombre);
-				hayEspacio = true; //Solamente se dan altas si hay lugares disponibles
-			} else {
-				pos++;
-			}
-		}
-		return hayEspacio;
-	}
-	
-	@Override
-	public boolean reemplazarJugadores(String nombre,int posicion)  {
-		boolean seReemplazo = false;
-		if (posicion >= 0 && posicion <= cantJugadores) {
-			if (!(jugadores[posicion - 1] == null)){
-				seReemplazo = true;
-				jugadores[posicion - 1].setNombre(nombre);
-			}
-		}
-		return seReemplazo;
-	}*/
-	
-	// *************************************************************
 	//                      GETTERS
 	// *************************************************************
 	

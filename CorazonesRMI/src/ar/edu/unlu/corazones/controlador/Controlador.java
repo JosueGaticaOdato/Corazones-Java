@@ -193,16 +193,16 @@ public class Controlador implements IControladorRemoto {
 				this.vista.nuevaJugada();
 				break;	
 			case PEDIR_CARTA:
-				this.vista.pedirCarta(this.nombreJugadorActual());
+				this.vista.pedirCarta();
 				break;
 			case JUGAR_2_DE_TREBOL:
-				this.vista.jugarDosDeTrebol(this.nombreJugadorActual());
+				this.vista.jugarDosDeTrebol();
 				break;
 			case CARTA_TIRADA_INVALIDA:
-				this.vista.cartaTiradaInvalida(this.nombreJugadorActual());
+				this.vista.cartaTiradaInvalida();
 				break;
 			case CARTA_TIRADA_INVALIDA_2_DE_TREBOL:
-				this.vista.cartaTiradaInvalida2deTrebol(this.nombreJugadorActual());
+				this.vista.cartaTiradaInvalida2deTrebol();
 				break;
 			case PERDEDOR_JUGADA:
 				this.vista.perdedorJugada();

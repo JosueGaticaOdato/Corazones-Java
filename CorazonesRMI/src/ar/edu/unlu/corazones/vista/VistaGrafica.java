@@ -2,9 +2,14 @@ package ar.edu.unlu.corazones.vista;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;
@@ -13,9 +18,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -24,9 +31,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
+import ar.edu.unlu.corazones.modelo.Carta;
+import ar.edu.unlu.corazones.modelo.Jugada;
 import ar.edu.unlu.corazones.vista.gui.FondoTapete;
+import ar.edu.unlu.corazones.vista.gui.VistaCarta;
 import ar.edu.unlu.corazones.vista.gui.VistaInicioSesion;
 
 public class VistaGrafica extends JFrame implements IVista {
@@ -279,9 +291,6 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	private void iniciarJuego() throws HeadlessException, RemoteException {
 		if (this.controlador.isCantidadJugadoresValida()) {
-
-			JOptionPane.showMessageDialog(this, "Juego comenzado!", "Juego iniciado", JOptionPane.INFORMATION_MESSAGE);
-			//controlador.iniciarJuego();
 			//Lo ejecuto en un hilo separado para no bloquear la vista
 			new Thread(() -> {
 	            try {
@@ -296,6 +305,207 @@ public class VistaGrafica extends JFrame implements IVista {
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
+	
+	// *************************************************************
+	//                      PANTALLA JUEGO
+	// *************************************************************
+	
+	private void crearVistaJuego() throws RemoteException {
+		panelJuego = new JPanel(new BorderLayout());
+		panelJuego.setOpaque(false);
+
+		// Barra superior
+		barraSuperior = new JPanel(new BorderLayout());
+		barraSuperior.setOpaque(false);
+		barraSuperior.setPreferredSize(new Dimension(1100, 50));
+		barraSuperior.setBorder(
+				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2), " Estado del juego ",
+						TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]), Color.WHITE));
+		barraSuperior.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Ocupa todo el ancho
+		labelBarraSuperior = new JLabel("", SwingConstants.CENTER);
+		labelBarraSuperior.setFont(new Font(fuentes[0], Font.BOLD, tamañoFuentes[0]));
+		labelBarraSuperior.setForeground(Color.WHITE);
+		barraSuperior.add(labelBarraSuperior, BorderLayout.CENTER);
+		panelJuego.add(barraSuperior, BorderLayout.NORTH);
+
+		// Panel izquierdo (Numero de jugada, numero de ronda, puntajes)
+		panelIzquierdo = crearPanelIzquierdo();
+
+		panelJuego.add(panelIzquierdo, BorderLayout.WEST);
+
+		// Panel central para cartas jugadas
+		panelCentro = crearPanelCentro();
+		panelJuego.add(panelCentro, BorderLayout.CENTER);
+
+		// Panel inferior (cartas en mano)
+		panelInferior = crearPanelJugador();
+		panelJuego.add(panelInferior, BorderLayout.SOUTH);
+
+		// Inicializar posiciones dinámicamente
+		String[] nombresJugadores = this.controlador.listaJugadores();
+		inicializarPosicionesJugadores(nombresJugadores);
+
+		panelPrincipal.add(panelJuego, "juego");
+	}
+	
+	private JPanel crearPanelCentro() throws RemoteException {
+	    JPanel panel = new JPanel(new GridBagLayout());
+	    panel.setOpaque(false);
+
+	    GridBagConstraints gbc = new GridBagConstraints();
+	    gbc.weightx = 1.0;
+	    gbc.weighty = 1.0;
+	    gbc.anchor = GridBagConstraints.CENTER; 
+
+	    Font fuenteNombres = new Font(fuentes[0], Font.BOLD, tamañoFuentes[0]);
+	    Color colorTexto = Color.WHITE;
+	    
+	    String[] jugadores = this.controlador.listaJugadores();
+
+	    // Paneles para cada jugador
+	    JPanel panelNorte = crearPanelJugadorCentro(jugadores[2], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelSur = crearPanelJugadorCentro(jugadores[0], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelEste = crearPanelJugadorCentro(jugadores[3], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelOeste = crearPanelJugadorCentro(jugadores[1], new VistaCarta(), fuenteNombres, colorTexto);
+
+	    // Ubico los paneles en el GridBagLayout
+	    gbc.gridx = 1; gbc.gridy = 0;
+	    panel.add(panelNorte, gbc);  // (Norte)
+
+	    gbc.gridx = 1; gbc.gridy = 2;
+	    panel.add(panelSur, gbc);  // (Sur)
+
+	    gbc.gridx = 2; gbc.gridy = 1;
+	    panel.add(panelEste, gbc);  // (Este)
+
+	    gbc.gridx = 0; gbc.gridy = 1;
+	    panel.add(panelOeste, gbc);  // (Oeste)
+
+	    return panel;
+	}
+	
+	private JPanel crearPanelJugadorCentro(String nombre, VistaCarta carta, Font fuente, Color color) {
+	    JPanel panelJugador = new JPanel();
+	    panelJugador.setLayout(new BorderLayout());
+	    panelJugador.setOpaque(false);
+
+	    JLabel labelNombre = new JLabel(nombre, SwingConstants.CENTER);
+	    labelNombre.setFont(fuente);
+	    labelNombre.setForeground(color);
+
+	    panelJugador.add(labelNombre, BorderLayout.NORTH);
+	    panelJugador.add(carta, BorderLayout.CENTER);
+
+	    return panelJugador;
+	}
+	
+	private JPanel crearPanelIzquierdo() throws RemoteException {
+		panelIzquierdo = new JPanel();
+		panelIzquierdo.setOpaque(false);
+		panelIzquierdo.setLayout(new BoxLayout(panelIzquierdo, BoxLayout.Y_AXIS));
+		panelIzquierdo.setPreferredSize(new Dimension(300, 150));
+
+		// ******************* Sección: Número de Ronda *********************
+
+		panelNumeroRonda = new JPanel(new BorderLayout());
+		panelNumeroRonda.setOpaque(false);
+		panelNumeroRonda.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2),
+				" Ronda N° ", TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]), Color.WHITE));
+		panelNumeroRonda.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Ocupa todo el ancho
+		labelRonda = new JLabel("1", SwingConstants.CENTER);
+		labelRonda.setFont(new Font(fuentes[0], Font.BOLD, tamañoFuentes[0]));
+		labelRonda.setForeground(Color.WHITE);
+		panelNumeroRonda.add(labelRonda, BorderLayout.CENTER);
+
+		// ******************* Sección: Número de Jugada *********************
+
+		panelNumeroJugada = new JPanel(new BorderLayout());
+		panelNumeroJugada.setOpaque(false);
+		panelNumeroJugada.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2),
+				" Jugada N°", TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]), Color.WHITE));
+		panelNumeroJugada.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Ocupa todo el ancho
+		labelJugada = new JLabel("1", SwingConstants.CENTER);
+		labelJugada.setFont(new Font(fuentes[0], Font.BOLD, tamañoFuentes[0]));
+		labelJugada.setForeground(Color.WHITE);
+		panelNumeroJugada.add(labelJugada, BorderLayout.CENTER);
+
+		// **** Sección: Puntajes (GridLayout de 4 filas, 2 columnas) ********
+
+		panelPuntaje = new JPanel(new GridLayout(4, 2, 5, 5));
+		panelPuntaje.setOpaque(false);
+		panelPuntaje.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2),
+				" Puntaje ", TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]), Color.WHITE));
+		panelPuntaje.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150)); // Ocupa todo el ancho
+
+		String[] jugadores = this.controlador.listaJugadores();
+		
+		for (int i = 0; i < 4; i++) {
+			
+			JLabel nombreJugador = new JLabel(jugadores[i], SwingConstants.CENTER);
+			nombreJugador.setForeground(Color.WHITE);
+			nombreJugador.setFont(new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]));
+
+			JLabel puntajeJugador = new JLabel("0", SwingConstants.CENTER);
+			puntajeJugador.setFont(new Font(this.fuentes[0], Font.BOLD, tamañoFuentes[0]));
+			puntajeJugador.setForeground(Color.WHITE);
+			panelPuntaje.add(nombreJugador);
+			panelPuntaje.add(puntajeJugador);
+		}
+
+		// ******************* Sección: Corazones rotos *********************
+
+		panelCorazon = new JPanel(new BorderLayout());
+		panelCorazon.setOpaque(false);
+		panelCorazon.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Ocupa todo el ancho
+
+		labelCorazon = new JLabel(iconoCorazon);
+		labelCorazon.setHorizontalAlignment(SwingConstants.CENTER);
+		labelCorazon.setVerticalAlignment(SwingConstants.CENTER);
+
+		// Agrego la imagen al panel
+		panelCorazon.add(labelCorazon, BorderLayout.CENTER);
+
+		// *******************************************************************
+
+		// Agrego las secciones al panel izquierdo
+		panelIzquierdo.add(panelNumeroRonda);
+		panelIzquierdo.add(panelNumeroJugada);
+		panelIzquierdo.add(panelPuntaje);
+		panelIzquierdo.add(panelCorazon);
+
+		return panelIzquierdo;
+	}
+	
+	private JPanel crearPanelJugador() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setOpaque(false);
+		panel.setPreferredSize(new Dimension(150, 150));
+		panel.setBorder(
+				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.WHITE, 2), " " + vInicioSesion.getGetNombreUsuario() + " ",
+						TitledBorder.CENTER, TitledBorder.TOP, new Font(this.fuentes[0], Font.BOLD, this.tamañoFuentes[0]), Color.WHITE));
+		panel.setName(vInicioSesion.getGetNombreUsuario());
+
+		// Contenedor para las cartas
+		contenedorCartas = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		contenedorCartas.setOpaque(false);
+		panel.add(contenedorCartas, BorderLayout.CENTER);
+
+		return panel;
+	}
+
+	private void inicializarPosicionesJugadores(String[] nombresJugadores) {
+		posicionesJugadores = new HashMap<>();
+
+		// Asociar jugadores a posiciones en base al índice
+		posicionesJugadores.put(nombresJugadores[0], new Point(1, 2)); // Sur
+		posicionesJugadores.put(nombresJugadores[1], new Point(0, 1)); // Oeste
+		posicionesJugadores.put(nombresJugadores[2], new Point(1, 0)); // Norte
+		posicionesJugadores.put(nombresJugadores[3], new Point(2, 1)); // Este
+	}
+	
+	// *************************************************************
+	//                    PASAJE DE CARTAS
+	// *************************************************************
 
 	@Override
 	public void pasajeDeCartas() throws RemoteException {
@@ -338,42 +548,271 @@ public class VistaGrafica extends JFrame implements IVista {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	// *************************************************************
+	// 							JUEGO
+	// *************************************************************
+
+	// ****************** ACTUALIZAR ESTADO ************************
+	
+	private void actualizarJugadaPuntaje() throws RemoteException {
+		labelJugada.setText(String.valueOf(this.controlador.numeroJugada()));
+
+		int[] puntajes = this.controlador.puntajesJugadores();
+		for (int i = 0; i < puntajes.length; i++) {
+
+			((JLabel) panelPuntaje.getComponent(i * 2 + 1)).setText(String.valueOf(puntajes[i]));
+		}
+
+		panelIzquierdo.revalidate();
+		panelIzquierdo.repaint();
+	}
+
+	private void actualizarRonda() throws RemoteException {
+		labelRonda.setText("Ronda N° " + this.controlador.numeroRonda());
+
+		panelIzquierdo.revalidate();
+		panelIzquierdo.repaint();
+	}
+
+	private void actualizarEstadoJuego(String text) {
+		labelBarraSuperior.setText(text);
+		barraSuperior.revalidate();
+		barraSuperior.repaint();
+	}
+
+	private void actualizarCorazon(Boolean corazonRoto) {
+		if (corazonRoto) {
+			labelCorazon.setIcon(iconoCorazonRoto);
+		} else {
+			labelCorazon.setIcon(iconoCorazon);
+		}
+
+		panelIzquierdo.revalidate();
+		panelIzquierdo.repaint();
+	}
+	
+	// ******** NUEVA JUGADA (ACTUALIZA JUGADA-PUNTOS) ************
 
 	@Override
 	public void nuevaJugada() throws RemoteException {
-		// TODO Auto-generated method stub
-		
+		actualizarJugadaPuntaje();
 	}
+	
+	// ****************** CARTAS REPARTIDAS ************************
 
 	@Override
 	public void cartasRepartidas() throws RemoteException {
-		// TODO Auto-generated method stub
+		crearVistaJuego();
+		mostrarVista("juego");
+		System.out.println("cartas repartidas");
+		actualizarEstadoJuego("Cartas repartidas!");
 		
+		//Muestro la mano correspondiente del jugador
+		mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
+	}
+
+	private void mostrarCartasJugador(ArrayList<Carta> cartas) {
+
+		contenedorCartas.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+		contenedorCartas.removeAll();
+
+		for (int i = 0; i < cartas.size(); i++) {
+			Carta carta = cartas.get(i);
+			VistaCarta vistaCarta = new VistaCarta(carta);
+
+			// Panel vertical para la carta y su posición
+			JPanel panelCarta = new JPanel();
+			panelCarta.setLayout(new BorderLayout());
+			panelCarta.setOpaque(false);
+
+			// Añadir la carta
+			panelCarta.add(vistaCarta, BorderLayout.CENTER);
+
+			// Crear y añadir el JLabel con la posición
+			JLabel labelPosicion = new JLabel(String.valueOf(i + 1));
+			labelPosicion.setHorizontalAlignment(SwingConstants.CENTER);
+			labelPosicion.setFont(new Font(fuentes[0], Font.PLAIN, tamañoFuentes[1]));
+			labelPosicion.setForeground(Color.WHITE);
+			panelCarta.add(labelPosicion, BorderLayout.SOUTH);
+
+			contenedorCartas.add(panelCarta);
+		}
+
+		contenedorCartas.revalidate();
+		contenedorCartas.repaint();
+	}
+	
+	// ******************** JUGAR DOS DE TREBOL ********************
+	
+	@Override
+	public void jugarDosDeTrebol() throws RemoteException{
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		actualizarEstadoJuego("Jugador dos de trebol - " + jugadorActual);
+
+		pedirCarta();
+	}
+	
+	// ********************** PEDIR CARTA ***************************
+
+	@Override
+	public void pedirCarta() throws RemoteException {
+		
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
+			System.out.println("Pedir cartas");
+			
+			String mensaje = "Es el turno del jugador " + jugadorActual;
+	
+			actualizarEstadoJuego("Turno de " + jugadorActual);
+	
+			mostrarMensaje(mensaje);
+	
+			int indiceCarta = mostrarSeleccionCarta(mensaje);
+	
+			if (indiceCarta >= 0) {
+				System.out.println(indiceCarta);
+				controlador.cartaJugada(indiceCarta);
+			} else {
+				mostrarMensajeError("Selección inválida. Intente nuevamente.");
+				pedirCarta(); // Volver a pedir si el índice no es válido
+			}
+		} else {
+			esperaJugadorActual();
+		}
+	}
+
+	private int mostrarSeleccionCarta(String text) {
+		String entrada = JOptionPane.showInputDialog(this, "Ingrese el número de la carta que desea jugar:",
+				text, JOptionPane.QUESTION_MESSAGE);
+
+		System.out.println(entrada);
+		try {
+			int seleccion = Integer.parseInt(entrada);
+			return seleccion - 1;
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
+	@Override
+	public void esperaJugadorActual() throws RemoteException {
+		System.out.println("Esperando que el jugador " + this.controlador.nombreJugadorActual() + " termine su jugada...");
+	}
+	
+
+	// ****************** CARTA TIRADA VALIDA **********************
+
+	@Override
+	public void cartaTiradaValida() throws RemoteException {
+
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
+
+			// Crear la vista de la carta jugada
+			Carta cartaAJugar = this.controlador.getCartaAJugar();
+			VistaCarta vistaCarta = new VistaCarta(cartaAJugar);
+
+			removerCartaDeLaMano(cartaAJugar);
+
+			enviarCartaJugadaAlCentro(nombreJugador, vistaCarta);
+			
+			actualizarEstadoJuego("Cambio de turno");
+			
+		}
+	}
+	
+	private void removerCartaDeLaMano(Carta carta) {
+		// Iterar sobre los componentes del contenedor de cartas
+		for (Component comp : contenedorCartas.getComponents()) {
+			if (comp instanceof JPanel panelCarta) {
+				// Buscar la VistaCarta dentro de este panel
+				for (Component subComp : panelCarta.getComponents()) {
+					if (subComp instanceof VistaCarta vistaSubCarta) {
+						if (vistaSubCarta.getCarta().equals(carta)) {
+
+							System.out.println("Chau carta");
+							contenedorCartas.remove(panelCarta);
+							return;
+
+						}
+					}
+				}
+			}
+		}
+
+		// Refrescar la vista del contenedor
+		contenedorCartas.revalidate();
+		contenedorCartas.repaint();
+
+	}
+	
+	private void enviarCartaJugadaAlCentro(String nombreJugador, VistaCarta vistaCarta) {
+	    // Obtener la posición del jugador en el panel central
+	    Point posicion = posicionesJugadores.get(nombreJugador);
+
+	    // Buscar el panel del jugador en la grilla
+	    for (Component comp : panelCentro.getComponents()) {
+	        if (comp instanceof JPanel) {
+	            GridBagConstraints constraints = ((GridBagLayout) panelCentro.getLayout()).getConstraints(comp);
+	            if (constraints.gridx == (int) posicion.getX() && constraints.gridy == (int) posicion.getY()) {
+	                JPanel panelJugador = (JPanel) comp;
+
+	                // Reemplazar solo la carta
+	                Component[] componentes = panelJugador.getComponents();
+	                for (Component c : componentes) {
+	                    if (c instanceof VistaCarta) {
+	                        panelJugador.remove(c);
+	                        break;
+	                    }
+	                }
+
+	                // Agregar la nueva carta jugada
+	                panelJugador.add(vistaCarta, BorderLayout.CENTER);
+
+	                // Refrescar la vista
+	                panelJugador.revalidate();
+	                panelJugador.repaint();
+	                break;
+	            }
+	        }
+	    }
+	}
+
+	// ****************** CARTA TIRADA INVALIDA ********************
+
+	@Override
+	public void cartaTiradaInvalida() throws RemoteException {
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
+
+			mostrarMensajeError("La carta que seleccioanste es invalida."
+					+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
+					+ "Por favor, intentalo denuevo.");
+			pedirCarta();
+			
+		}
 	}
 
 	@Override
-	public void pedirCarta(String jugadorActual) throws RemoteException {
-		// TODO Auto-generated method stub
+	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
 		
-	}
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 
-	@Override
-	public void jugarDosDeTrebol(String jugadorActual) throws RemoteException {
-		// TODO Auto-generated method stub
-		
+			mostrarMensajeError("La carta que seleccioanste es invalida. "
+					+ "Para comenzar el juego si o si tienes que tirar " + "el 2 de Trebol. Por favor, intentalo denuevo.");
+			pedirCarta();
+			
+		}
 	}
-
-	@Override
-	public void cartaTiradaInvalida(String jugadorActual) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
+	
+	// ******************** PERDEDOR JUGADA ************************
 
 	@Override
 	public void perdedorJugada() throws RemoteException {
@@ -383,12 +822,6 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	@Override
 	public void corazonesRotos() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void cartaTiradaValida() throws RemoteException {
 		// TODO Auto-generated method stub
 		
 	}
@@ -410,5 +843,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		// TODO Auto-generated method stub
 		
 	}
+
+
 
 }

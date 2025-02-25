@@ -42,18 +42,14 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	
 	private boolean corazonesRotos;
 	
-	private List<Observador> observadores;
-	
 	// *************************************************************
 	// 						CONSTRUCTOR
 	// *************************************************************
 	
 	public Corazones() {
 		this.jugadores = new HashMap<>();
-		ronda = 1;
-
-		this.observadores = new ArrayList<>();
 		this.jugadas = new ArrayList<>();
+		ronda = 1;
 	}
 	
 	// *************************************************************

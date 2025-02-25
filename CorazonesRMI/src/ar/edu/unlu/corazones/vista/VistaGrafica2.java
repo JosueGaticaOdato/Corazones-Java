@@ -800,62 +800,7 @@ public class VistaGrafica2 extends JFrame implements IVista {
 		actualizarEstadoJuego("Cambio de turno");
 	}
 
-	private void removerCartaDeLaMano(Carta carta) {
-		// Iterar sobre los componentes del contenedor de cartas
-		for (Component comp : contenedorCartas.getComponents()) {
-			if (comp instanceof JPanel panelCarta) {
-				// Buscar la VistaCarta dentro de este panel
-				for (Component subComp : panelCarta.getComponents()) {
-					if (subComp instanceof VistaCarta vistaSubCarta) {
-						if (vistaSubCarta.getCarta().equals(carta)) {
 
-							System.out.println("Chau carta");
-							contenedorCartas.remove(panelCarta);
-							return;
-
-						}
-					}
-				}
-			}
-		}
-
-		// Refrescar la vista del contenedor
-		contenedorCartas.revalidate();
-		contenedorCartas.repaint();
-
-	}
-	
-	private void enviarCartaJugadaAlCentro(String nombreJugador, VistaCarta vistaCarta) {
-	    // Obtener la posición del jugador en el panel central
-	    Point posicion = posicionesJugadores.get(nombreJugador);
-
-	    // Buscar el panel del jugador en la grilla
-	    for (Component comp : panelCentro.getComponents()) {
-	        if (comp instanceof JPanel) {
-	            GridBagConstraints constraints = ((GridBagLayout) panelCentro.getLayout()).getConstraints(comp);
-	            if (constraints.gridx == (int) posicion.getX() && constraints.gridy == (int) posicion.getY()) {
-	                JPanel panelJugador = (JPanel) comp;
-
-	                // Reemplazar solo la carta
-	                Component[] componentes = panelJugador.getComponents();
-	                for (Component c : componentes) {
-	                    if (c instanceof VistaCarta) {
-	                        panelJugador.remove(c);
-	                        break;
-	                    }
-	                }
-
-	                // Agregar la nueva carta jugada
-	                panelJugador.add(vistaCarta, BorderLayout.CENTER);
-
-	                // Refrescar la vista
-	                panelJugador.revalidate();
-	                panelJugador.repaint();
-	                break;
-	            }
-	        }
-	    }
-	}
 
 	// ****************** CARTA TIRADA INVALIDA ********************
 

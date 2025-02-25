@@ -352,6 +352,11 @@ public class VistaConsola2 implements IVista {
 		controlador.cartaJugada(posCarta - 1); //Paso la carta
 		continuar();
 	}
+	
+	@Override
+	public void esperaJugadorActual() throws RemoteException{
+		System.out.println("Esperando que el jugador " + this.controlador.nombreJugadorActual() + " termine su jugada.");
+	}
 
 	// ******************** JUGAR DOS DE TREBOL ********************
 	

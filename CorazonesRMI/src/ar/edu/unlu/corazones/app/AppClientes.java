@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.vista.IVista;
-import ar.edu.unlu.corazones.vista.VistaGrafica2;
+import ar.edu.unlu.corazones.vista.VistaGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
 
@@ -24,7 +24,7 @@ public class AppClientes {
     private static void iniciarCliente(String ipCliente, int portCliente, String ipServidor, int portServidor) {
         try {
             Controlador controlador = new Controlador();
-            IVista vista = new VistaGrafica2(controlador);
+            IVista vista = new VistaGrafica(controlador);
             Cliente cliente = new Cliente(ipCliente, portCliente, ipServidor, portServidor);
             
             vista.iniciar();

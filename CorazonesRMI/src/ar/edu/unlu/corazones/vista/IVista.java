@@ -18,7 +18,6 @@ public interface IVista {
     //                      PASAJE DE CARTAS
 	// *************************************************************
 	
-	
 	void pasajeDeCartas() throws RemoteException;
 	  
 	void pedirCartaPasaje() throws RemoteException;
@@ -41,13 +40,15 @@ public interface IVista {
 	  
 	void cartasRepartidas() throws RemoteException;
 	  
-	void pedirCarta(String jugadorActual) throws RemoteException;
-	  
-	void jugarDosDeTrebol(String jugadorActual) throws RemoteException;
-	  
-	void cartaTiradaInvalida(String jugadorActual) throws RemoteException;
+	void pedirCarta() throws RemoteException;
 	
-	void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException;
+	void esperaJugadorActual() throws RemoteException;
+	  
+	void jugarDosDeTrebol() throws RemoteException;
+	  
+	void cartaTiradaInvalida() throws RemoteException;
+	
+	void cartaTiradaInvalida2deTrebol() throws RemoteException;
 	  
 	void perdedorJugada() throws RemoteException;
 	  

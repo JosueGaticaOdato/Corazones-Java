@@ -9,7 +9,7 @@ import java.util.List;
 import ar.edu.unlu.corazones.observer.Observador;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
-public class Corazones extends ObservableRemoto implements ICorazones {
+public class Corazones2 extends ObservableRemoto implements ICorazones {
 
 	// *************************************************************
 	// 						CONSTANTES
@@ -164,86 +164,63 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	// 					FUNCIONALIDAD JUGADAS
 	// *************************************************************
 	
-	// Para comenzar la ronda es necesario que el jugador que tiene el 2 de trébol comience
-	private void primerCarta2Trebol(Jugada jugada) throws RemoteException {
-	    boolean tengoDosDeTrebol = false;
-	    int pos = 0;
-
-	    // Buscar qué jugador tiene el 2 de trébol
-	    while (!tengoDosDeTrebol && pos < cantJugadores) {
-	        tengoDosDeTrebol = getJugadores()[pos].tengoDosDeTrebol();
-	        if (tengoDosDeTrebol) {
-	            turno = pos;
-	            notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
-
-	            boolean dosDeTrebolTirado = false;
-
-	            // Hasta que el jugador no tire el 2 de trébol, el juego no arranca
-	            while (!dosDeTrebolTirado) {
-	                
-	                // Esperar hasta que se reciba una carta válida
-	                while (cartaAJugar == null) {
-	                    try {
-	                        Thread.sleep(100); // Pequeño delay para evitar que consuma CPU
-	                    } catch (InterruptedException e) {
-	                        Thread.currentThread().interrupt();
-	                        return;
-	                    }
-	                }
-
-	                if (jugada.tirarDosDeTrebol(cartaAJugar, turno)) {
-	                    // Remover la carta de la mano del jugador
-	                	System.out.println("jugada.tirarDosDeTrebol(cartaAJugar, turno) true");
-	                    getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
-	                    notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
-
-	                    // Avanzar el turno al siguiente jugador
-	                    turno = (turno + 1) % cantJugadores;
-	                    dosDeTrebolTirado = true;
-	                    cartaAJugar = null;
-
-	                } else {
-	                    // Notificar que la carta tirada no es válida
-	                    notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
-	                    cartaAJugar = null; // Reiniciar para esperar una nueva carta válida
-	                }
-	            }
-	        } else {
-	            pos++;
-	        }
-	    }
+	//Para comenzar la ronda es necesario que el jugador que tiene el dos de trebol comience
+	private void primerCarta2Trebol(Jugada jugada) throws RemoteException  {
+		boolean tengoDosDeTrebol = false;
+		int pos = 0;
+		while (!tengoDosDeTrebol && pos < cantJugadores) {
+			
+			//Obtengo al jugador que tiene el 2 de trebol
+			tengoDosDeTrebol = getJugadores()[pos].tengoDosDeTrebol();
+			if (tengoDosDeTrebol) {
+				turno = pos;
+				notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
+				boolean dosDeTrebolTirado = false;
+				
+				//Hasta que no tire el dos de trebol no arranca el juego!
+				while ( !dosDeTrebolTirado ) {
+					
+					if (jugada.tirarDosDeTrebol(cartaAJugar, turno) && (cartaAJugar != null)) {
+						
+						getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
+						notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
+						turno = (turno + 1) % cantJugadores;
+						dosDeTrebolTirado = true;
+						
+					} else {
+						
+						notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
+					}
+					
+				}
+				
+			} else {
+				pos++;
+			}
+		}
 	}
-
 	
-	private void jugarCarta(Jugada jugada) throws RemoteException {
-	    boolean cartaTiradaValida = false;
-	    
-	    // 🔹 Bucle que espera hasta que se seleccione una carta
-	    while (cartaAJugar == null) {
-	        try {
-	            Thread.sleep(100); // 🔹 Pequeña espera para no bloquear el hilo
-	        } catch (InterruptedException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
-	    // 🔹 Bucle que valida si la carta jugada es válida o no
-	    while (!cartaTiradaValida) {
-	        if (jugada.tirarCartaEnMesa(turno, cartaAJugar, this.corazonesRotos)) {
-	            getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
-	            tiroCorazones();
-	            notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
-	            turno = (turno + 1) % cantJugadores;
-	            cartaTiradaValida = true;
-	        } else {
-	            notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA);
-	        }
-	    }
-
-	    // 🔹 Reiniciar `cartaAJugar` para la próxima ronda
-	    cartaAJugar = null;
+	private void jugarCarta(Jugada jugada) throws RemoteException  {
+		
+		boolean cartaTiradaValida = false;
+		
+		while ( !cartaTiradaValida ) {
+			
+			if (jugada.tirarCartaEnMesa(turno, cartaAJugar, this.corazonesRotos) && (cartaAJugar != null)) {
+				getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
+				tiroCorazones();
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA);
+				turno = (turno + 1) % cantJugadores;
+				cartaTiradaValida = true;
+				
+			} else {
+				
+				notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA);
+				
+			}
+		}
+		
 	}
-
 	
 	// Metodo para indicar que un jugador tiro la carta de corazones
 	private void tiroCorazones() throws RemoteException  {

@@ -45,6 +45,7 @@ public class Jugador implements IJugador, Serializable {
 	
 	@Override
 	public Carta tirarCarta(int posCarta) {
+		System.out.println("tirarCarta - posCarta:" + posCarta);
 		Carta cartaTirada = obtenerCartaJugador(posCarta);
 		mano.remove(posCarta);
 		return cartaTirada;
@@ -124,6 +125,7 @@ public class Jugador implements IJugador, Serializable {
 	
 	@Override
 	public Carta obtenerCartaJugador(int posCarta) {
+		System.out.println("obtenerCartaJugador - posCarta:" + posCarta);
 		try {
 			return mano.get(posCarta);			
 		} catch (Exception e) {

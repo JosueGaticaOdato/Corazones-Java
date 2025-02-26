@@ -102,8 +102,6 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	private JPanel panelInferior;
 	private JPanel contenedorCartas;
-
-	private Map<String, Point> posicionesJugadores = new HashMap<>();
 	
 	// *************************************************************
 	//							CONSTRUCTOR
@@ -170,18 +168,20 @@ public class VistaGrafica extends JFrame implements IVista {
 		JOptionPane.showMessageDialog(this, mensaje);
 	}
 	
-	private void mostrarAvisoNoEsTuTurno() {
+	private void mostrarAviso(String mensaje) {
 	    JDialog dialogo = new JDialog(this, "Aviso", false);
 	    dialogo.setLayout(new BorderLayout());
-	    dialogo.add(new JLabel("No es tu turno. Espera tu turno.", SwingConstants.CENTER), BorderLayout.CENTER);
+	    dialogo.add(new JLabel(mensaje, SwingConstants.CENTER), BorderLayout.CENTER);
 	    dialogo.setSize(250, 100);
 	    dialogo.setLocationRelativeTo(this);
 	    
-	    // 🔹 Cierra el cartel después de 1.5 segundos
+	    //Cierra el cartel después de 1.5 segundos
 	    new Timer(1500, e -> dialogo.dispose()).start();
 	    
 	    dialogo.setVisible(true);
 	}
+	
+	
 	
 	// *************************************************************
 	// 							PRE-JUEGO
@@ -359,10 +359,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		panelInferior = crearPanelJugador();
 		panelJuego.add(panelInferior, BorderLayout.SOUTH);
 
-		// Inicializar posiciones dinámicamente
-		String[] nombresJugadores = this.controlador.listaJugadores();
-		inicializarPosicionesJugadores(nombresJugadores);
-
 		panelPrincipal.add(panelJuego, "juego");
 	}
 	
@@ -381,10 +377,10 @@ public class VistaGrafica extends JFrame implements IVista {
 	    String[] jugadores = this.controlador.listaJugadores();
 
 	    // Paneles para cada jugador
-	    JPanel panelNorte = crearPanelJugadorCentro(jugadores[2], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelSur = crearPanelJugadorCentro(jugadores[0], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelEste = crearPanelJugadorCentro(jugadores[3], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelOeste = crearPanelJugadorCentro(jugadores[1], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelNorte = crearPanelJugadorCentro(jugadores[0], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelSur = crearPanelJugadorCentro(jugadores[1], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelEste = crearPanelJugadorCentro(jugadores[2], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelOeste = crearPanelJugadorCentro(jugadores[3], new VistaCarta(), fuenteNombres, colorTexto);
 
 	    // Ubico los paneles en el GridBagLayout
 	    gbc.gridx = 1; gbc.gridy = 0;
@@ -413,6 +409,8 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	    panelJugador.add(labelNombre, BorderLayout.NORTH);
 	    panelJugador.add(carta, BorderLayout.CENTER);
+	    
+	    panelJugador.setName(nombre);
 
 	    return panelJugador;
 	}
@@ -509,16 +507,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		panel.add(contenedorCartas, BorderLayout.CENTER);
 
 		return panel;
-	}
-
-	private void inicializarPosicionesJugadores(String[] nombresJugadores) {
-		posicionesJugadores = new HashMap<>();
-
-		// Asociar jugadores a posiciones en base al índice
-		posicionesJugadores.put(nombresJugadores[0], new Point(1, 2)); // Sur
-		posicionesJugadores.put(nombresJugadores[1], new Point(0, 1)); // Oeste
-		posicionesJugadores.put(nombresJugadores[2], new Point(1, 0)); // Norte
-		posicionesJugadores.put(nombresJugadores[3], new Point(2, 1)); // Este
 	}
 	
 	// *************************************************************
@@ -623,8 +611,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void cartasRepartidas() throws RemoteException {
 		crearVistaJuego();
 		mostrarVista("juego");
-		System.out.println("cartas repartidas");
-		actualizarEstadoJuego("Cartas repartidas!");
+		
+		mostrarAviso("Repartiendo cartas!");
 		
 		//Muestro la mano correspondiente del jugador
 		mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
@@ -701,7 +689,7 @@ public class VistaGrafica extends JFrame implements IVista {
 			
 			String mensaje = "Es el turno del jugador " + jugadorActual;
 	
-			mostrarMensaje(mensaje);
+			//mostrarMensaje(mensaje);
 			
 		} else {
 			esperaJugadorActual();
@@ -717,7 +705,7 @@ public class VistaGrafica extends JFrame implements IVista {
 				
 				controlador.cartaJugada(indice);
 			} else {
-				mostrarAvisoNoEsTuTurno();
+				mostrarAviso("No es tu turno. Espera tu turno.");
 			}
 	        
 	    } catch (RemoteException e) {
@@ -745,12 +733,32 @@ public class VistaGrafica extends JFrame implements IVista {
 			VistaCarta vistaCarta = new VistaCarta(cartaAJugar);
 
 			removerCartaDeLaMano(cartaAJugar);
-
-			enviarCartaJugadaAlCentro(nombreJugador, vistaCarta);
 			
-			//1actualizarEstadoJuego("Cambio de turno");
+			System.out.println("*      CARTAS EN MESA      *");
+			System.out.println();
+			Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
+			for (int i = 0; i < cartasEnMesa.length ; i++) {
+				
+				Carta carta = cartasEnMesa[i];
+				
+				if (carta != null) {
+					System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
+							": " + carta.mostrarCarta());
+				} else {
+					System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
+							": " + "sin jugar");
+				}
+				
+			}
+			System.out.println();
+			System.out.println("****************************");
+			System.out.println();
 			
 		}
+		
+		System.out.println("Carta tirada valida");
+		//Cada vez que se tira una carta, se tiene que actualizar la mesa de cada jugador
+		actualizarMesa();
 	}
 	
 	private void removerCartaDeLaMano(Carta carta) {
@@ -779,18 +787,19 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	}
 	
-	private void enviarCartaJugadaAlCentro(String nombreJugador, VistaCarta vistaCarta) {
-	    // Obtener la posición del jugador en el panel central
-	    Point posicion = posicionesJugadores.get(nombreJugador);
-
-	    // Buscar el panel del jugador en la grilla
-	    for (Component comp : panelCentro.getComponents()) {
-	        if (comp instanceof JPanel) {
-	            GridBagConstraints constraints = ((GridBagLayout) panelCentro.getLayout()).getConstraints(comp);
-	            if (constraints.gridx == (int) posicion.getX() && constraints.gridy == (int) posicion.getY()) {
+	private void actualizarMesa() throws RemoteException {
+		Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
+		
+	    for (int i = 0; i < cartasEnMesa.length; i++) {
+	        if (cartasEnMesa[i] != null) { // Si el jugador ya jugó una carta
+	            VistaCarta vistaCarta = new VistaCarta(cartasEnMesa[i]); // Crear la carta con el modelo
+	            
+	            // Buscar el panel correspondiente en la mesa
+	            Component comp = panelCentro.getComponent(i);
+	            if (comp instanceof JPanel) {
 	                JPanel panelJugador = (JPanel) comp;
 
-	                // Reemplazar solo la carta
+	                // Reemplazar la carta en el panel
 	                Component[] componentes = panelJugador.getComponents();
 	                for (Component c : componentes) {
 	                    if (c instanceof VistaCarta) {
@@ -799,13 +808,11 @@ public class VistaGrafica extends JFrame implements IVista {
 	                    }
 	                }
 
-	                // Agregar la nueva carta jugada
 	                panelJugador.add(vistaCarta, BorderLayout.CENTER);
 
 	                // Refrescar la vista
 	                panelJugador.revalidate();
 	                panelJugador.repaint();
-	                break;
 	            }
 	        }
 	    }

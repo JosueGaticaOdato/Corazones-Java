@@ -132,6 +132,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	}
 	
 	private void repartirCartas() throws RemoteException {
+		//13 cartas repartidas para los 4 jugadores
 		for (int i = 0; i < cantCartasRepartidas; i++) {
 			for (IJugador jugador : getJugadores()) {
 				System.out.println(jugador);
@@ -164,12 +165,12 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	// 					FUNCIONALIDAD JUGADAS
 	// *************************************************************
 	
-	// Para comenzar la ronda es necesario que el jugador que tiene el 2 de trébol comience
+	// Para comenzar la ronda es necesario que el jugador que tiene el 2 de trebol comience
 	private void primerCarta2Trebol(Jugada jugada) throws RemoteException {
 	    boolean tengoDosDeTrebol = false;
 	    int pos = 0;
 
-	    // Buscar qué jugador tiene el 2 de trébol
+	    // Buscar que jugador tiene el 2 de trebol
 	    while (!tengoDosDeTrebol && pos < cantJugadores) {
 	        tengoDosDeTrebol = getJugadores()[pos].tengoDosDeTrebol();
 	        if (tengoDosDeTrebol) {
@@ -181,10 +182,10 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	            // Hasta que el jugador no tire el 2 de trébol, el juego no arranca
 	            while (!dosDeTrebolTirado) {
 	                
-	                // Esperar hasta que se reciba una carta válida
+	                // Espero a que la carta que se juega sea valida
 	                while (cartaAJugar == null) {
 	                    try {
-	                        Thread.sleep(100); // Pequeño delay para evitar que consuma CPU
+	                        Thread.sleep(100); // Delay para evitar que consuma CPU
 	                    } catch (InterruptedException e) {
 	                        Thread.currentThread().interrupt();
 	                        return;
@@ -205,11 +206,11 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	                } else {
 	                    // Notificar que la carta tirada no es válida
 	                    notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
-	                    cartaAJugar = null; // Reiniciar para esperar una nueva carta válida
+	                    cartaAJugar = null; // Reiniciar para esperar una nueva carta valida
 	                }
 	            }
 	        } else {
-	            pos++;
+	            pos++; //Voy al siguiente jugador para saber si tiene el 2 de trebol
 	        }
 	    }
 	}
@@ -218,17 +219,19 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	private void jugarCarta(Jugada jugada) throws RemoteException {
 	    boolean cartaTiradaValida = false;
 	    
-	    // 🔹 Bucle que espera hasta que se seleccione una carta
-	    while (cartaAJugar == null) {
-	        try {
-	            Thread.sleep(100); // 🔹 Pequeña espera para no bloquear el hilo
-	        } catch (InterruptedException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
-	    // 🔹 Bucle que valida si la carta jugada es válida o no
 	    while (!cartaTiradaValida) {
+	    	
+		    // Espero a que la carta que se juega sea valida
+		    while (cartaAJugar == null) {
+		        try {
+		            Thread.sleep(100); // Delay para evitar que consuma CPU
+		        } catch (InterruptedException e) {
+		            e.printStackTrace();
+		        }
+		    }
+
+	    	// Evaluo si la carta que se tiro es valida o no
+	    
 	        if (jugada.tirarCartaEnMesa(turno, cartaAJugar, this.corazonesRotos)) {
 	            getJugadores()[turno].tirarCarta(getJugadores()[turno].buscarCarta(cartaAJugar));
 	            tiroCorazones();
@@ -237,10 +240,11 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	            cartaTiradaValida = true;
 	        } else {
 	            notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA);
+	            cartaAJugar = null;
 	        }
 	    }
 
-	    // 🔹 Reiniciar `cartaAJugar` para la próxima ronda
+	    // Para la proxima jugada, se reinicia la cartaAJugar para que funcione el ciclo
 	    cartaAJugar = null;
 	}
 
@@ -510,7 +514,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	            int clave = clavesOrdenadas.get(i);
 	            nombresJugadores[i] = jugadores.get(clave).getNombre();
 	        } else {
-	            nombresJugadores[i] = null; // Espaciio vacio si no hay jugadores
+	            nombresJugadores[i] = null; // Espacio vacio si no hay jugadores
 	        }
 	    }
 	    

@@ -54,6 +54,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	private final String[] fuentes = {"Tahoma","Arial"};
 
 	private final int[] tamañoFuentes = {14,12};
+	
+	private final int[] tiemposMensajes = {1500, 2500};
 
 	private final ImageIcon iconoCorazon = new ImageIcon(
 			new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/corazon.png")).getImage()
@@ -136,7 +138,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		});
 		
 		/* CONTROL DE DESCONEXION DEL JUGADOR */
-		
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -168,21 +169,19 @@ public class VistaGrafica extends JFrame implements IVista {
 		JOptionPane.showMessageDialog(this, mensaje);
 	}
 	
-	private void mostrarAviso(String mensaje) {
+	private void mostrarAviso(String mensaje, int Tiempo) {
 	    JDialog dialogo = new JDialog(this, "Aviso", false);
 	    dialogo.setLayout(new BorderLayout());
 	    dialogo.add(new JLabel(mensaje, SwingConstants.CENTER), BorderLayout.CENTER);
 	    dialogo.setSize(250, 100);
 	    dialogo.setLocationRelativeTo(this);
 	    
-	    //Cierra el cartel después de 1.5 segundos
-	    new Timer(1500, e -> dialogo.dispose()).start();
+	    //Cierra el cartel después de X segundos
+	    new Timer(Tiempo, e -> dialogo.dispose()).start();
 	    
 	    dialogo.setVisible(true);
 	}
-	
-	
-	
+
 	// *************************************************************
 	// 							PRE-JUEGO
 	// *************************************************************
@@ -377,11 +376,17 @@ public class VistaGrafica extends JFrame implements IVista {
 	    String[] jugadores = this.controlador.listaJugadores();
 
 	    // Paneles para cada jugador
-	    JPanel panelNorte = crearPanelJugadorCentro(jugadores[0], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelSur = crearPanelJugadorCentro(jugadores[1], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelEste = crearPanelJugadorCentro(jugadores[2], new VistaCarta(), fuenteNombres, colorTexto);
-	    JPanel panelOeste = crearPanelJugadorCentro(jugadores[3], new VistaCarta(), fuenteNombres, colorTexto);
-
+	    JPanel panelNorte = crearPanelJugadorCentro(jugadores[2], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelSur = crearPanelJugadorCentro(jugadores[0], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelEste = crearPanelJugadorCentro(jugadores[3], new VistaCarta(), fuenteNombres, colorTexto);
+	    JPanel panelOeste = crearPanelJugadorCentro(jugadores[1], new VistaCarta(), fuenteNombres, colorTexto);
+	    
+	    // Asocio cada indice con el panel del jugador
+	    panelNorte.putClientProperty("jugadorIndex", 2);
+	    panelSur.putClientProperty("jugadorIndex", 0);
+	    panelEste.putClientProperty("jugadorIndex", 3);
+	    panelOeste.putClientProperty("jugadorIndex", 1);
+	    
 	    // Ubico los paneles en el GridBagLayout
 	    gbc.gridx = 1; gbc.gridy = 0;
 	    panel.add(panelNorte, gbc);  // (Norte)
@@ -394,7 +399,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	    gbc.gridx = 0; gbc.gridy = 1;
 	    panel.add(panelOeste, gbc);  // (Oeste)
-
+	    
 	    return panel;
 	}
 	
@@ -612,12 +617,12 @@ public class VistaGrafica extends JFrame implements IVista {
 		crearVistaJuego();
 		mostrarVista("juego");
 		
-		mostrarAviso("Repartiendo cartas!");
+		mostrarAviso("Repartiendo cartas!",tiemposMensajes[0]);
 		
 		//Muestro la mano correspondiente del jugador
 		mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 	}
-
+	
 	private void mostrarCartasJugador(ArrayList<Carta> cartas) {
 
 		contenedorCartas.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -633,9 +638,9 @@ public class VistaGrafica extends JFrame implements IVista {
 			panelCarta.setLayout(new BorderLayout());
 			panelCarta.setOpaque(false);
 			
-			final int indice = i; // Guardamos el índice actual
+			final int indice = i; // Indice actual
 
-	        // Agregar evento de clic para jugar la carta
+	        // Eventos de click para jugar la carta
 	        vistaCarta.addMouseListener(new MouseAdapter() {
 	            @Override
 	            public void mouseClicked(MouseEvent e) {
@@ -644,13 +649,13 @@ public class VistaGrafica extends JFrame implements IVista {
 	            
 	            @Override
 	            public void mouseEntered(MouseEvent e) {
-	                // 🔹 Efecto cuando el mouse pasa sobre la carta
+	                //Efecto cuando el mouse pasa sobre la carta
 	                vistaCarta.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
 	            }
 
 	            @Override
 	            public void mouseExited(MouseEvent e) {
-	                // 🔹 Quitar el efecto cuando el mouse sale de la carta
+	                //Quitar el efecto cuando el mouse sale de la carta
 	                vistaCarta.setBorder(null);
 	            }
 	            
@@ -670,9 +675,6 @@ public class VistaGrafica extends JFrame implements IVista {
 	
 	@Override
 	public void jugarDosDeTrebol() throws RemoteException{
-		String jugadorActual = this.controlador.nombreJugadorActual();
-		actualizarEstadoJuego("Jugador dos de trebol - " + jugadorActual);
-
 		pedirCarta();
 	}
 	
@@ -682,30 +684,26 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void pedirCarta() throws RemoteException {
 		
 		String jugadorActual = this.controlador.nombreJugadorActual();
-		actualizarEstadoJuego("Turno de " + jugadorActual);
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-			System.out.println("Pedir cartas");
 			
-			String mensaje = "Es el turno del jugador " + jugadorActual;
-	
-			//mostrarMensaje(mensaje);
+			System.out.println("Pedir cartas");
+			actualizarEstadoJuego("ES TU TURNO");
 			
 		} else {
+			actualizarEstadoJuego("Esperando al jugador " + jugadorActual + "...");
 			esperaJugadorActual();
 		}
 	}
 	
 	private void jugarCarta(int indice) {
 		try {
-	        // 🔹 Mostrar mensaje con la carta seleccionada
 			String jugadorActual = this.controlador.nombreJugadorActual();
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-				JOptionPane.showMessageDialog(this, "Has seleccionado: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
-				
+				//JOptionPane.showMessageDialog(this, "Has seleccionado: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
 			} else {
-				mostrarAviso("No es tu turno. Espera tu turno.");
+				mostrarAviso("Aun no es tu turno. Espera por favor.",tiemposMensajes[0]);
 			}
 	        
 	    } catch (RemoteException e) {
@@ -730,33 +728,13 @@ public class VistaGrafica extends JFrame implements IVista {
 
 			// Crear la vista de la carta jugada
 			Carta cartaAJugar = this.controlador.getCartaAJugar();
-			VistaCarta vistaCarta = new VistaCarta(cartaAJugar);
 
 			removerCartaDeLaMano(cartaAJugar);
-			
-			System.out.println("*      CARTAS EN MESA      *");
-			System.out.println();
-			Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
-			for (int i = 0; i < cartasEnMesa.length ; i++) {
-				
-				Carta carta = cartasEnMesa[i];
-				
-				if (carta != null) {
-					System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
-							": " + carta.mostrarCarta());
-				} else {
-					System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
-							": " + "sin jugar");
-				}
-				
-			}
-			System.out.println();
-			System.out.println("****************************");
-			System.out.println();
 			
 		}
 		
 		System.out.println("Carta tirada valida");
+		
 		//Cada vez que se tira una carta, se tiene que actualizar la mesa de cada jugador
 		actualizarMesa();
 	}
@@ -788,42 +766,49 @@ public class VistaGrafica extends JFrame implements IVista {
 	}
 	
 	private void actualizarMesa() throws RemoteException {
-		Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
-		
-	    for (int i = 0; i < cartasEnMesa.length; i++) {
-	        if (cartasEnMesa[i] != null) { // Si el jugador ya jugó una carta
-	            VistaCarta vistaCarta = new VistaCarta(cartasEnMesa[i]); // Crear la carta con el modelo
-	            
-	            // Buscar el panel correspondiente en la mesa
-	            Component comp = panelCentro.getComponent(i);
-	            if (comp instanceof JPanel) {
-	                JPanel panelJugador = (JPanel) comp;
+	    Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
 
-	                // Reemplazar la carta en el panel
-	                Component[] componentes = panelJugador.getComponents();
-	                for (Component c : componentes) {
-	                    if (c instanceof VistaCarta) {
-	                        panelJugador.remove(c);
+	    for (int i = 0; i < cartasEnMesa.length; i++) {
+	        if (cartasEnMesa[i] != null) { // Si el jugador ya jugo una carta
+	            VistaCarta vistaCarta = new VistaCarta(cartasEnMesa[i]); 
+	            
+	            // Busco el panel del jugador por su indice en el componente
+	            for (Component comp : panelCentro.getComponents()) {
+	                if (comp instanceof JPanel) {
+	                    JPanel panelJugador = (JPanel) comp;
+	                    Integer jugadorIndex = (Integer) panelJugador.getClientProperty("jugadorIndex");
+
+	                    if (jugadorIndex != null && jugadorIndex == i) { 
+	                    	
+	                        // Reemplazar la carta en el panel
+	                        Component[] componentes = panelJugador.getComponents();
+	                        for (Component c : componentes) {
+	                            if (c instanceof VistaCarta) {
+	                                panelJugador.remove(c);
+	                                break;
+	                            }
+	                        }
+
+	                        panelJugador.add(vistaCarta, BorderLayout.CENTER);
+
+	                        // Refrescar la vista
+	                        panelJugador.revalidate();
+	                        panelJugador.repaint();
 	                        break;
 	                    }
 	                }
-
-	                panelJugador.add(vistaCarta, BorderLayout.CENTER);
-
-	                // Refrescar la vista
-	                panelJugador.revalidate();
-	                panelJugador.repaint();
 	            }
 	        }
 	    }
 	}
+
 
 	// ****************** CARTA TIRADA INVALIDA ********************
 
 	@Override
 	public void cartaTiradaInvalida() throws RemoteException {
 		
-		/*String jugadorActual = this.controlador.nombreJugadorActual();
+		String jugadorActual = this.controlador.nombreJugadorActual();
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 
@@ -832,14 +817,14 @@ public class VistaGrafica extends JFrame implements IVista {
 					+ "Por favor, intentalo denuevo.");
 			pedirCarta();
 			
-		}*/
+		}
 		
 	}
 
 	@Override
 	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
 		
-		/*String jugadorActual = this.controlador.nombreJugadorActual();
+		String jugadorActual = this.controlador.nombreJugadorActual();
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 
@@ -847,7 +832,7 @@ public class VistaGrafica extends JFrame implements IVista {
 					+ "Para comenzar el juego si o si tienes que tirar " + "el 2 de Trebol. Por favor, intentalo denuevo.");
 			pedirCarta();
 		
-		}*/
+		}
 	}
 	
 	// ******************** PERDEDOR JUGADA ************************
@@ -855,25 +840,91 @@ public class VistaGrafica extends JFrame implements IVista {
 	@Override
 	public void perdedorJugada() throws RemoteException {
 		// TODO Auto-generated method stub
+		mostrarAviso("El perdedor de esta jugada es "  + this.controlador.jugadorPerdedorJugada(),tiemposMensajes[1]);
 		
+		actualizarJugadaPuntaje();
+		
+		limpiarCartasJugadas();
+	}
+	
+	private void limpiarCartasJugadas() {
+	    for (Component comp : panelCentro.getComponents()) {
+	        if (comp instanceof JPanel) {
+	            JPanel panelJugador = (JPanel) comp;
+
+	            // Buscar y remover la carta jugada dentro del panel
+	            Component[] componentes = panelJugador.getComponents();
+	            for (Component c : componentes) {
+	                if (c instanceof VistaCarta) {
+	                    panelJugador.remove(c);
+	                    break;
+	                }
+	            }
+
+	            // Agregar una nueva carta vacía
+	            VistaCarta nuevaCarta = new VistaCarta();
+	            panelJugador.add(nuevaCarta, BorderLayout.CENTER);
+
+	            // Refrescar el panel
+	            panelJugador.revalidate();
+	            panelJugador.repaint();
+	        }
+	    }
 	}
 
+	// ******************* CORAZONES ROTOS ***********************
+	
 	@Override
 	public void corazonesRotos() throws RemoteException {
 		// TODO Auto-generated method stub
-		
+		actualizarCorazon(true);
+		actualizarEstadoJuego("CORAZONES ROTOS");
+		mostrarAviso("A partir de ahora se pueden tirar corazones",tiemposMensajes[0]);
 	}
+	
+	// *************************************************************
+	// 						   PUNTAJE
+	// *************************************************************
+
+	private String puntaje() throws RemoteException {
+		String s = "*          PUNTAJE         *" + "\n";
+		s  += "\n";
+		int[] puntajes = this.controlador.puntajesJugadores();
+		for (int i = 0; i < puntajes.length; i++) {
+			s += (i+1) + ") " + this.controlador.getJugador(i) + 
+					" -> " + puntajes[i] + "\n";
+		}
+		return s;
+	}
+	
+	// *************************************************************
+	//                       FIN DE RONDA
+	// *************************************************************
 
 	@Override
 	public void finDeRonda() throws RemoteException {
 		// TODO Auto-generated method stub
-		
+		actualizarEstadoJuego("FIN DE RONDA");
+		mostrarAviso("FIN DE LA RONDA", tiemposMensajes[0]);
+		mostrarAviso(puntaje(), tiemposMensajes[1]);
+		actualizarRonda();
+		actualizarCorazon(false);
 	}
+	
+	// *************************************************************
+	//                       FIN DE JUEGO
+	// *************************************************************
 
 	@Override
 	public void finDeJuego() throws RemoteException {
 		// TODO Auto-generated method stub
-		
+		actualizarEstadoJuego("FIN DEL JUEGO");
+		mostrarAviso("FIN DEL JUEGO",tiemposMensajes[0]);
+		String jugadorGanador = this.controlador.ganadorJuego();
+		actualizarEstadoJuego("GANADOR DEL JUEGO: " + jugadorGanador + " ¡¡¡FELICIDADES!!!");
+		mostrarAviso(
+		puntaje() + "\n" + "El ganador fue " + this.controlador.ganadorJuego() + "\n" + "¡¡¡FELICIDADES!!!",tiemposMensajes[1]);
+		mostrarVista("menu");
 	}
 
 	@Override

@@ -296,7 +296,7 @@ public class VistaConsola implements IVista {
 	// ************ PEDIR CARTAS (para tirar en mesa) **************
 	
 	@Override
-	public void pedirCarta(String jugadorActual) throws RemoteException {
+	public void pedirCarta() throws RemoteException {
 		// TODO Auto-generated method stub
 		if (jugadorActual == nombreJugador) {
 			combinacionRondaJugada();

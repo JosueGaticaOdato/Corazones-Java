@@ -27,10 +27,6 @@ public interface IVista {
 	void cartaTiradaValidaPasaje() throws RemoteException;
 	  
 	void finPasajeDeCartas() throws RemoteException;
-	
-	void pasajeDeCartasJugador() throws RemoteException;
-
-	void finPasajeDeCartasJugador() throws RemoteException;
 	 
 	// *************************************************************
 	// 							JUEGO

@@ -15,6 +15,8 @@ public class VistaConsola implements IVista {
 	
 	private final int lineas = 50; //para el salto de linea
 	
+	private final int[] tiemposMensajes = {1500, 2500};
+	
 	// *************************************************************
 	//                       ATRIBUTOS
 	// *************************************************************
@@ -34,10 +36,11 @@ public class VistaConsola implements IVista {
 	//Creo la instancia para que el usuario pueda ingresar los datos
 	public VistaConsola(Controlador controlador) {
 		this.entrada = new Scanner(System.in);
+		
 		this.controlador = controlador;
 		this.controlador.setVista(this);
 		
-		/* Control de desconexiones por parte del jugador */
+		//Control de desconexiones por parte del jugador
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 		    controlador.desconectarJugador();
 		    System.out.println("Jugador desconectado correctamente.");
@@ -51,8 +54,8 @@ public class VistaConsola implements IVista {
 	//Metodo para continuar y no sacar la pantalla de una
 	private void continuar() {
 		/*System.out.println("Escriba cualquier tecla para continuar...");
-		this.entrada.next();*/
-		limpiarPantalla();
+		this.entrada.next();
+		limpiarPantalla();*/
 	}
 	
 	//Limpieza de pantalla (en realidad agrega lineas)
@@ -63,6 +66,10 @@ public class VistaConsola implements IVista {
 	  System.out.println();
 	 }
 	}
+	
+	// *************************************************************
+	// 							MENSAJES
+	// *************************************************************
 	
 	private void combinacionRondaJugada() throws RemoteException {
 		puntaje();
@@ -133,6 +140,10 @@ public class VistaConsola implements IVista {
 		System.out.println("----------------------------");
 		System.out.println();
 		System.out.println();
+	}
+	
+	private void mostrarAviso(String mensaje) {
+		System.out.println(mensaje);
 	}
 	
 	// *************************************************************
@@ -234,10 +245,18 @@ public class VistaConsola implements IVista {
 	
 	public void jugar() throws RemoteException {
 		if ( this.controlador.isCantidadJugadoresValida() ) {
-			System.out.println("Juego comenzado!");
+			/*System.out.println("Juego comenzado!");
 			corazonesRotos = "";
 			continuar();
-			controlador.iniciarJuego();
+			controlador.iniciarJuego();*/
+			//Lo ejecuto en un hilo separado para no bloquear la vista
+			new Thread(() -> {
+	            try {
+	                controlador.iniciarJuego();
+	            } catch (RemoteException e) {
+	                e.printStackTrace();
+	            }
+	        }).start();
 		} else {
 			System.out.println("Faltan jugadores para comenzar el juego");
 		}
@@ -247,46 +266,93 @@ public class VistaConsola implements IVista {
 	//                    PASAJE DE CARTAS
 	// *************************************************************
 
+	// ****************** CARTAS REPARTIDAS ************************
+	
+	@Override
+	public void cartasRepartidas() throws RemoteException {
+		mostrarAviso("Repartiendo cartas!");
+	}
+	
+	// ************ PANTALLA PARA PASAJE X JUGADOR *****************
+	
 	@Override
 	public void pasajeDeCartas() throws RemoteException {
-		// TODO Auto-generated method stub
-		
+		int cantCartas = this.controlador.cantidadCartasPasaje();
+		String direccion = direccionPasaje();
+		combinacionRondaPasaje();
+		mostrarAviso("Cada jugador debe pasar " + String.valueOf(cantCartas) + " a su " + direccion);
 	}
+	
+	public String direccionPasaje() throws RemoteException {
+		String s = "No hay pasaje de cartas";
+		String direccion = this.controlador.direccionPasaje();
+		if (direccion != null) {
+			s = "Las cartas se pasan en la siguiente direccion: " + direccion + "\n";
+			s += "Cantidad de cartas a pasar: " + String.valueOf(this.controlador.cantidadCartasPasaje());
+		}
+		return s;
+	}
+	
+	// ****************** PEDIR CARTA (pasaje) *********************
 
 	@Override
 	public void pedirCartaPasaje() throws RemoteException {
-		// TODO Auto-generated method stub
+		String jugadorActual = this.controlador.nombreJugadorActual();
 		
+		if (nombreJugador.equals(jugadorActual)) {
+			
+			System.out.println("Es tu turno para pasar cartas!");
+			continuar();
+			combinacionRondaPasaje();
+			turnoJugador();
+			manoJugador();
+			int posCarta;
+			System.out.print("Elija una carta: ");
+			
+			try {
+				posCarta = entrada.nextInt();
+			} catch (Exception e) {
+				posCarta = -1;
+			}
+			
+			controlador.cartaJugadaPasaje(posCarta - 1);
+			
+		} else {
+			System.out.println("Esperando al jugador " + jugadorActual + "...");
+		}
 	}
+	
+	// ************ CARTA TIRADA INVALIDA PASAJE *******************
 
 	@Override
 	public void cartaTiradaInvalidaPasaje() throws RemoteException {
-		// TODO Auto-generated method stub
-		
+		System.out.println("La carta que seleccioanste es invalida."
+				+ " Por favor, intentalo denuevo.");
+		continuar();
+		pedirCartaPasaje();
 	}
+	
+	// ************** CARTA TIRADA VALIDA PASAJE *******************
 
 	@Override
 	public void cartaTiradaValidaPasaje() throws RemoteException {
-		// TODO Auto-generated method stub
+		String jugadorActual = this.controlador.nombreJugadorActual();
 		
+		if (nombreJugador.equals(jugadorActual)) {
+			Carta cartaAJugar = this.controlador.getCartaAJugar();	
+			mostrarAviso("Jugaste la carta " + cartaAJugar.getCarta());
+		}
 	}
+	
+	// ****************** FIN PASAJE DE CARTAS *********************
 
 	@Override
 	public void finPasajeDeCartas() throws RemoteException {
 		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void pasajeDeCartasJugador() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void finPasajeDeCartasJugador() throws RemoteException {
-		// TODO Auto-generated method stub
-		
+		mostrarAviso("****************************\r\n"
+				+ "		* FIN DEL PASAJE DE CARTAS *\r\n"
+				+ "		*    COMIENZA LA RONDA     *\r\n"
+				+ "		****************************");
 	}
 	
 	// *************************************************************
@@ -297,8 +363,9 @@ public class VistaConsola implements IVista {
 	
 	@Override
 	public void pedirCarta() throws RemoteException {
-		// TODO Auto-generated method stub
-		if (jugadorActual == nombreJugador) {
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
 			combinacionRondaJugada();
 			turnoJugador();
 			
@@ -336,43 +403,37 @@ public class VistaConsola implements IVista {
 	public void nuevaJugada() throws RemoteException {
 	}
 
-	@Override
-	public void cartasRepartidas() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
 	// ******************** JUGAR DOS DE TREBOL ********************
 
 	@Override
-	public void jugarDosDeTrebol(String jugadorActual) throws RemoteException {
+	public void jugarDosDeTrebol() throws RemoteException {
 		// TODO Auto-generated method stub
 		System.out.println("Como es la primer jugada, el jugador " + this.controlador.nombreJugadorActual() +
 				" debe iniciar el juego tirando el 2 de Trebol");
 		continuar();
-		pedirCarta(jugadorActual);
+		pedirCarta();
 	}
 
 	// ****************** CARTA TIRADA INVALIDA ********************
 	
 	@Override
-	public void cartaTiradaInvalida(String jugadorActual) throws RemoteException {
+	public void cartaTiradaInvalida() throws RemoteException {
 		// TODO Auto-generated method stub
 		System.out.println("La carta que seleccioanste es invalida."
 				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
 				+ "Por favor, intentalo denuevo.");
 		continuar();
-		pedirCarta(jugadorActual);
+		pedirCarta();
 	}
 
 	@Override
-	public void cartaTiradaInvalida2deTrebol(String jugadorActual) throws RemoteException {
+	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
 		// TODO Auto-generated method stub
 		System.out.println("La carta que seleccioanste es invalida."
 				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
 				+ "Por favor, intentalo denuevo.");
 		continuar();
-		pedirCarta(jugadorActual);
+		pedirCarta();
 	}
 	
 	// ******************** PERDEDOR JUGADA ************************
@@ -406,10 +467,5 @@ public class VistaConsola implements IVista {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void setControlador(Controlador controlador) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }

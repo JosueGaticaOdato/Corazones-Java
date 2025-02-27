@@ -71,6 +71,10 @@ public class Carta implements Serializable {
 		return valorTexto;
 	}
 	
+	public String getCarta() {
+		return String.valueOf(this.getValor()) + " - " + getPalo();
+	}
+	
 	// *************************************************************
 	//                      	SETTERS
 	// *************************************************************

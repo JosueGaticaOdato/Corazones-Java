@@ -710,18 +710,6 @@ public class VistaGrafica extends JFrame implements IVista {
 		mostrarAviso("Fin del pasaje de cartas",tiemposMensajes[0]);
 		mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 	}
-
-	@Override
-	public void pasajeDeCartasJugador() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void finPasajeDeCartasJugador() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	// *************************************************************
 	// 							JUEGO

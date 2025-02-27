@@ -225,6 +225,8 @@ public class VistaConsola implements IVista {
 			s += (i+1) + ") Jugador: "; 
 			if (jugadores[i] == null) {
 				s += "(Sin agregar)";
+			} else if (nombreJugador.equals(jugadores[i])){
+				s += jugadores[i] + " <-"; 
 			} else {
 				s += jugadores[i];
 			}
@@ -357,10 +359,15 @@ public class VistaConsola implements IVista {
 
 	@Override
 	public void cartaTiradaInvalidaPasaje() throws RemoteException {
-		System.out.println("La carta que seleccioanste es invalida."
-				+ " Por favor, intentalo denuevo.");
-		continuar();
-		pedirCartaPasaje();
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
+			System.out.println("La carta que seleccioanste es invalida."
+					+ " Por favor, intentalo denuevo.");
+			continuar();
+			pedirCartaPasaje();
+		}
+		
 	}
 	
 	// ************** CARTA TIRADA VALIDA PASAJE *******************
@@ -434,6 +441,7 @@ public class VistaConsola implements IVista {
 	        }
 	        
 	        if (posCarta >= 1) {
+	        	System.out.println("Posicion: " + posCarta);
 	            controlador.cartaJugada(posCarta - 1); //Paso la carta
 	        } else {
 	            System.out.println("Número de carta inválido.");

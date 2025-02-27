@@ -80,7 +80,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			pasajeDeCartas();
+			//pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {

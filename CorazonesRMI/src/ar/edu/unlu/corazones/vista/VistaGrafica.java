@@ -309,8 +309,19 @@ public class VistaGrafica extends JFrame implements IVista {
 		StringBuilder lista = new StringBuilder("Lista de jugadores:\n");
 
 		for (int i = 0; i < jugadores.length; i++) {
-			lista.append((i + 1)).append(") ").append(jugadores[i] != null ? jugadores[i] : "(Sin agregar)")
-					.append("\n");
+			
+		    lista.append((i + 1)).append(") ");
+
+		    if (jugadores[i] == null) {
+		        lista.append("(Sin agregar)");
+		    } else if (vInicioSesion.getGetNombreUsuario().equals(jugadores[i])) {
+		        lista.append(jugadores[i]).append(" <-");
+		    } else {
+		        lista.append(jugadores[i]);
+		    }
+		    
+		    lista.append("\n");	
+		
 		}
 
 		JOptionPane.showMessageDialog(this, lista.toString(), "Lista de Jugadores", JOptionPane.INFORMATION_MESSAGE);

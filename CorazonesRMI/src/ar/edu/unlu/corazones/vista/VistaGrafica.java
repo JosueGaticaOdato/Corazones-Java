@@ -7,23 +7,20 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -169,16 +166,31 @@ public class VistaGrafica extends JFrame implements IVista {
 		JOptionPane.showMessageDialog(this, mensaje);
 	}
 	
-	private void mostrarAviso(String mensaje, int Tiempo) {
+	private void mostrarAviso(String mensaje, int tiempo) {
 	    JDialog dialogo = new JDialog(this, "Aviso", false);
 	    dialogo.setLayout(new BorderLayout());
-	    dialogo.add(new JLabel(mensaje, SwingConstants.CENTER), BorderLayout.CENTER);
-	    dialogo.setSize(250, 100);
+
+	    JLabel label = new JLabel(mensaje, SwingConstants.CENTER);
+	    dialogo.add(label, BorderLayout.CENTER);
+
+	    // Obtengo el ancho y alto del texto
+	    FontMetrics metrics = label.getFontMetrics(label.getFont());
+	    int textWidth = metrics.stringWidth(mensaje);
+	    int textHeight = metrics.getHeight();
+
+	    // Definir un padding para que no quede justo
+	    int paddingX = 40; 
+	    int paddingY = 40; 
+	    int width = Math.max(250, textWidth + paddingX);
+	    int height = Math.max(100, textHeight + paddingY);
+
+	    // Ajustar tamaño dinámico
+	    dialogo.setSize(width, height);
 	    dialogo.setLocationRelativeTo(this);
-	    
-	    //Cierra el cartel después de X segundos
-	    new Timer(Tiempo, e -> dialogo.dispose()).start();
-	    
+
+	    // Cierra el cartel después de X segundos
+	    new Timer(tiempo, e -> dialogo.dispose()).start();
+
 	    dialogo.setVisible(true);
 	}
 
@@ -702,6 +714,9 @@ public class VistaGrafica extends JFrame implements IVista {
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 				//JOptionPane.showMessageDialog(this, "Has seleccionado: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
+				
+				// Volver a mostrar las cartas con los índices actualizados
+		        mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 			} else {
 				mostrarAviso("Aun no es tu turno. Espera por favor.",tiemposMensajes[0]);
 			}
@@ -726,14 +741,31 @@ public class VistaGrafica extends JFrame implements IVista {
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 
-			// Crear la vista de la carta jugada
-			Carta cartaAJugar = this.controlador.getCartaAJugar();
-
-			removerCartaDeLaMano(cartaAJugar);
+			removerCartaDeLaMano(this.controlador.getCartaAJugar());
 			
 		}
 		
 		System.out.println("Carta tirada valida");
+		
+		System.out.println("*      CARTAS EN MESA      *");
+		System.out.println();
+		Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
+		for (int i = 0; i < cartasEnMesa.length ; i++) {
+			
+			Carta carta = cartasEnMesa[i];
+			
+			if (carta != null) {
+				System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
+						": " + carta.mostrarCarta());
+			} else {
+				System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
+						": " + "sin jugar");
+			}
+			
+		}
+		System.out.println();
+		System.out.println("****************************");
+		System.out.println();
 		
 		//Cada vez que se tira una carta, se tiene que actualizar la mesa de cada jugador
 		actualizarMesa();
@@ -749,9 +781,13 @@ public class VistaGrafica extends JFrame implements IVista {
 						if (vistaSubCarta.getCarta().getPalo() == carta.getPalo() && 
 								vistaSubCarta.getCarta().getValor() == carta.getValor()) {
 
-							System.out.println("Chau carta");
-							contenedorCartas.remove(panelCarta);
-							return;
+	                        System.out.println("Chau carta");
+	                        contenedorCartas.remove(panelCarta);
+	                        
+	                        // Refrescar la vista del contenedor
+	                        contenedorCartas.revalidate();
+	                        contenedorCartas.repaint();   
+	                        return;
 
 						}
 					}
@@ -759,7 +795,7 @@ public class VistaGrafica extends JFrame implements IVista {
 			}
 		}
 
-		// Refrescar la vista del contenedor
+		
 		contenedorCartas.revalidate();
 		contenedorCartas.repaint();
 
@@ -845,7 +881,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		actualizarJugadaPuntaje();
 		
 		limpiarCartasJugadas();
-	}
+	}	
 	
 	private void limpiarCartasJugadas() {
 	    for (Component comp : panelCentro.getComponents()) {

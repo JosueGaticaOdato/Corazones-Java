@@ -28,6 +28,8 @@ public class VistaCarta extends JPanel {
 	
 	private Carta carta;
 	
+	private boolean marcada = false;
+	
 	// *************************************************************
 	//                        CONSTRUCTOR
 	// *************************************************************
@@ -117,6 +119,14 @@ public class VistaCarta extends JPanel {
 
 	public void setCarta(Carta carta) {
 		this.carta = carta;
+	}
+	
+	public boolean isMarcada() {
+	    return marcada;
+	}
+
+	public void setMarcada(boolean marcada) {
+	    this.marcada = marcada;
 	}
 	
 }

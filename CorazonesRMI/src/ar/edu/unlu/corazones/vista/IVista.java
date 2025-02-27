@@ -69,10 +69,6 @@ public interface IVista {
 	//                		 OBSERVER
 	// *************************************************************
 	
-	void setControlador(Controlador controlador) throws RemoteException;
-
-
-
-
+	//void setControlador(Controlador controlador) throws RemoteException;
 
 }

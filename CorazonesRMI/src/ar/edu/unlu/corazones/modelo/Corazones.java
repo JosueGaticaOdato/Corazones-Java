@@ -80,7 +80,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			//pasajeDeCartas();
+			pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {
@@ -214,7 +214,6 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	        }
 	    }
 	}
-
 	
 	private void jugarCarta(Jugada jugada) throws RemoteException {
 	    boolean cartaTiradaValida = false;
@@ -248,7 +247,6 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	    cartaAJugar = null;
 	}
 
-	
 	// Metodo para indicar que un jugador tiro la carta de corazones
 	private void tiroCorazones() throws RemoteException  {
 		if (cartaAJugar.getPalo() == Palo.CORAZONES && !this.corazonesRotos) {
@@ -298,38 +296,32 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 		}
 	}
 	
-	private void intercambioDeCartas(int valor) throws RemoteException  {
-		// Esto funciona para que el intercambio se haga sobre el final y los otros
-		// jugadores no tengan acceso a las cartas nuevas recibidas
+	private void intercambioDeCartas(int valor) throws RemoteException {
 		ArrayList<Carta[]> arregloDeCartasAIntercambiar = new ArrayList<Carta[]>(cantJugadores);
-
+		
 		// Inicializar cada posición del ArrayList con un arreglo de Carta vacío
 		for (int i = 0; i < cantJugadores; i++) {
 			arregloDeCartasAIntercambiar.add(new Carta[0]);
 		}
 		
-		for (IJugador jugadorPasaje : getJugadores()) {
-			
-			notificarObservadores(EventosCorazones.PASAJE_DE_CARTAS_POR_JUGADOR);
-
-			// Obtengo la posicion del jugaodr actual y a quien le va a pasar las cartas
-			int posicionJugadorActual = buscarJugador(jugadorPasaje);
+		for (int j = 0; j < cantJugadores; j++) {
 			
 			// Para saber a quien le paso las cartas, tengo que sumar la variable de pasaje
 			// a la posicion del jugador actual, y a eso dividirlo por la cantidad de
 			// jugadores
-			int posicionJugadorPasaje = (posicionJugadorActual + valor + getJugadores().length) % getJugadores().length;
-
+			int posicionJugadorPasaje = (turno + valor + getJugadores().length) % getJugadores().length;
+			
 			// Creo la lista de las cartas que se van a pasar al otro jugador
 			Carta[] cartasIntercambio = new Carta[cantCartasIntercambio];
-
+			
 			for (int i = 0; i < cantCartasIntercambio; i++) {
 				// Obntego la carta que jugo el jugador
-				notificarObservadores(EventosCorazones.PEDIR_CARTA_PASAJE);
+				notificarObservadores(EventosCorazones.PEDIR_CARTA_PASAJE);			    
 				cartaTiradaValidaPasaje(cartasIntercambio);
 				cartasIntercambio[i] = this.cartaAJugar;
+				cartaAJugar = null;
 			}
-
+			
 			// Guardo en el arreglo (POR POSICION DE JUGADOR) las cartas nuevas obtenidas y saco las cartas de la mano
 			arregloDeCartasAIntercambiar.set(posicionJugadorPasaje, cartasIntercambio);
 			for (int i = 0; i < cantCartasIntercambio; i++) {
@@ -338,10 +330,10 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 			}
 			
 			notificarObservadores(EventosCorazones.FIN_PASAJE_DE_CARTAS_POR_JUGADOR);
-
+			
 			turno = (turno + 1) % getJugadores().length; // Obtengo el siguiente jugador
 		}
-
+		
 		otorgarCartasJugadores(arregloDeCartasAIntercambiar);
 	}
 	
@@ -350,12 +342,22 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 		boolean cartaTiradaValida = false;
 		while ( !cartaTiradaValida ) {
 			
-			if ((cartaAJugar != null) && (!buscarCarta(cartasIntercambio, cartaAJugar))) {
+			 // Espero a que la carta que se juega sea valida
+		    while (cartaAJugar == null) {
+		        try {
+		            Thread.sleep(100); // Delay para evitar que consuma CPU
+		        } catch (InterruptedException e) {
+		            e.printStackTrace();
+		        }
+		    }
+			
+			if (!buscarCarta(cartasIntercambio, cartaAJugar)) {
 				//jugadores[turno].tirarCarta(jugadores[turno].buscarCarta(cartaAJugar));
 				cartaTiradaValida = true;
 				notificarObservadores(EventosCorazones.CARTA_TIRADA_VALIDA_PASAJE);
 			} else {
 				notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_PASAJE);
+				 cartaAJugar = null;
 			}
 		}
 		
@@ -374,20 +376,6 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 		}
 		return encontrada;
 		
-	}
-		
-	// Metodo que busca la posicion de un jugador determinado
-	private int buscarJugador(IJugador jugador) throws RemoteException {
-		int posicionJugadorBuscar = 0;
-		boolean encontrado = false;
-		while (!encontrado && posicionJugadorBuscar < getJugadores().length) {
-			if (getJugadores()[posicionJugadorBuscar] == jugador) {
-				encontrado = true;
-			} else {
-				posicionJugadorBuscar++;
-			}
-		}
-		return posicionJugadorBuscar;
 	}
 	
 	// Otorgo las cartas que se pasaron a cada jugador

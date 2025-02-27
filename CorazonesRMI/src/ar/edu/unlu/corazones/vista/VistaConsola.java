@@ -1,5 +1,8 @@
 package ar.edu.unlu.corazones.vista;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,11 +20,15 @@ public class VistaConsola implements IVista {
 	
 	private final int[] tiemposMensajes = {1500, 2500};
 	
+	
+
 	// *************************************************************
 	//                       ATRIBUTOS
 	// *************************************************************
 	
 	private Scanner entrada;
+	
+	private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 	
 	private Controlador controlador;
 	
@@ -51,20 +58,34 @@ public class VistaConsola implements IVista {
 	//                COMPORTAMIENTO PROPIO DE LA CONSOLA
 	// *************************************************************
 	
-	//Metodo para continuar y no sacar la pantalla de una
+	/*//Metodo para continuar y no sacar la pantalla de una
 	private void continuar() {
-		/*System.out.println("Escriba cualquier tecla para continuar...");
+		System.out.println("Escriba cualquier tecla para continuar...");
 		this.entrada.next();
-		limpiarPantalla();*/
+		limpiarPantalla();
+	}
+	
+	private void continuar() {
+	    System.out.println("Escriba cualquier tecla para continuar...");
+	    this.entrada.nextLine(); // Ahora siempre lee hasta el final de la línea
+	}*/
+	
+	private void continuar() {
+	    /*System.out.println("Escriba cualquier tecla para continuar...");
+	    try {
+	        reader.readLine(); // Lee una línea completa de entrada
+	    } catch (IOException e) {
+	        e.printStackTrace();  // En caso de que haya un error de entrada
+	    }*/
 	}
 	
 	//Limpieza de pantalla (en realidad agrega lineas)
 	private void limpiarPantalla()
 	{
-	 for (int i=0; i < this.lineas; i++)
+	 /*for (int i=0; i < this.lineas; i++)
 	 {
 	  System.out.println();
-	 }
+	 }*/
 	}
 	
 	// *************************************************************
@@ -153,11 +174,23 @@ public class VistaConsola implements IVista {
 	@Override
 	public void iniciar() throws RemoteException {
 		
-		boolean salir = conectarJugador();;
-		while(salir) {
+		boolean salir = conectarJugador();
+		int opcion = -1;
+		while(salir && (opcion != 2)) {
 			limpiarPantalla();
 			mostrarMenu();
-			int opcion = this.entrada.nextInt();
+			
+	        try {
+	            String input = reader.readLine();  // Lee la línea completa
+	            opcion = Integer.parseInt(input);  // Convierte la entrada a entero
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        } catch (NumberFormatException e) {
+	            System.out.println("Opción no válida.");
+	        }
+	        
+	        
+			//int opcion = this.entrada.nextInt();
 			limpiarPantalla();
 			switch (opcion) {
 				case 1: //Mostrar lista de jugadores 
@@ -245,9 +278,9 @@ public class VistaConsola implements IVista {
 	
 	public void jugar() throws RemoteException {
 		if ( this.controlador.isCantidadJugadoresValida() ) {
-			/*System.out.println("Juego comenzado!");
+			//System.out.println("Juego comenzado!");
 			corazonesRotos = "";
-			continuar();
+			/*continuar();
 			controlador.iniciarJuego();*/
 			//Lo ejecuto en un hilo separado para no bloquear la vista
 			new Thread(() -> {
@@ -306,16 +339,25 @@ public class VistaConsola implements IVista {
 			combinacionRondaPasaje();
 			turnoJugador();
 			manoJugador();
-			int posCarta;
-			System.out.print("Elija una carta: ");
-			
-			try {
-				posCarta = entrada.nextInt();
-			} catch (Exception e) {
-				posCarta = -1;
-			}
-			
-			controlador.cartaJugadaPasaje(posCarta - 1);
+
+	        int posCarta = -1;
+	        System.out.print("Elija una carta: ");
+	        
+	        try {
+	            String input = reader.readLine();  // Leer la línea completa de entrada
+	            posCarta = Integer.parseInt(input);  // Convertir la entrada a entero
+	        } catch (IOException e) {
+	            e.printStackTrace();  // En caso de error de entrada
+	        } catch (NumberFormatException e) {
+	            posCarta = -1;  // Si la entrada no es un número válido, asignamos -1
+	            System.out.println("Entrada no válida. Intenta de nuevo.");
+	        }
+	        
+	        if (posCarta >= 1) {
+	            controlador.cartaJugadaPasaje(posCarta - 1);
+	        } else {
+	            System.out.println("Número de carta inválido.");
+	        }
 			
 		} else {
 			System.out.println("Esperando al jugador " + jugadorActual + "...");
@@ -350,9 +392,9 @@ public class VistaConsola implements IVista {
 	public void finPasajeDeCartas() throws RemoteException {
 		// TODO Auto-generated method stub
 		mostrarAviso("****************************\r\n"
-				+ "		* FIN DEL PASAJE DE CARTAS *\r\n"
-				+ "		*    COMIENZA LA RONDA     *\r\n"
-				+ "		****************************");
+				+ "* FIN DEL PASAJE DE CARTAS *\r\n"
+				+ "*    COMIENZA LA RONDA     *\r\n"
+				+ "****************************");
 	}
 	
 	// *************************************************************

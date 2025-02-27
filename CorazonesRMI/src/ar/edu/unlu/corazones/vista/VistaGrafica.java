@@ -56,6 +56,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	
 	private final int[] tiemposMensajes = {1500, 2500};
 
+	private final ImageIcon iconCorazones = new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/corazon.png"));
+	
 	private final ImageIcon iconoCorazon = new ImageIcon(
 			new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/corazon.png")).getImage()
 					.getScaledInstance(50, 50, Image.SCALE_SMOOTH));
@@ -117,6 +119,8 @@ public class VistaGrafica extends JFrame implements IVista {
 		setSize(1100, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
+		setIconImage(iconCorazones.getImage());
+
 
 		/* INICIALIZAR LAYOUT Y PANEL PRINCIPAL */
 		cardLayout = new CardLayout();
@@ -835,12 +839,12 @@ public class VistaGrafica extends JFrame implements IVista {
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 			
+			mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 			System.out.println("Pedir cartas");
-			actualizarEstadoJuego("ES TU TURNO");
+			actualizarEstadoJuego("ES TU TURNO - SELECCIONA UNA CARTA");
 			
 		} else {
 			actualizarEstadoJuego("Esperando al jugador " + jugadorActual + "...");
-			esperaJugadorActual();
 		}
 	}
 	
@@ -852,7 +856,7 @@ public class VistaGrafica extends JFrame implements IVista {
 				controlador.cartaJugada(indice);
 				
 				// Volver a mostrar las cartas con los índices actualizados
-		        mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
+				//mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
 			} else {
 				mostrarAviso("Aun no es tu turno. Espera por favor.",tiemposMensajes[0]);
 			}
@@ -864,7 +868,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	
 	@Override
 	public void esperaJugadorActual() throws RemoteException {
-		System.out.println("Esperando que el jugador " + this.controlador.nombreJugadorActual() + " termine su jugada...");
+		
 	}
 	
 
@@ -1051,7 +1055,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		// TODO Auto-generated method stub
 		actualizarCorazon(true);
 		actualizarEstadoJuego("CORAZONES ROTOS");
-		mostrarAviso("A partir de ahora se pueden tirar corazones",tiemposMensajes[0]);
+		mostrarAviso("A partir se pueden comenzar con corazones",tiemposMensajes[0]);
 	}
 	
 	// *************************************************************

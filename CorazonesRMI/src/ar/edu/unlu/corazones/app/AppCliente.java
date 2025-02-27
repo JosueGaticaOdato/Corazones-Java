@@ -52,8 +52,8 @@ public class AppCliente {
 		);*/
 		//IVista vista = new VistaConsola();
 		Controlador controlador = new Controlador();
-		//IVista vista = new VistaGrafica(controlador);
-		IVista vista = new VistaConsola(controlador);
+		IVista vista = new VistaGrafica(controlador);
+		//IVista vista = new VistaConsola(controlador);
 		Cliente c = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));	
 		try {
 			System.out.println("Iniciando controlador remoto...");

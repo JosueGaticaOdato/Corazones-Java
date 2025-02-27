@@ -518,7 +518,7 @@ public class VistaConsola implements IVista {
 	@Override
 	public void corazonesRotos() throws RemoteException {
 		// TODO Auto-generated method stub
-		mostrarAviso("\n" + "CORAZONES ROTOS" + "\n" + "A partir de ahora se pueden tirar corazones" + "\n");
+		mostrarAviso("\n" + "CORAZONES ROTOS" + "\n" + "A partir se pueden comenzar con corazones" + "\n");
 		continuar();
 	}
 

@@ -121,6 +121,10 @@ public class VistaCarta extends JPanel {
 		this.carta = carta;
 	}
 	
+	public String getCartaTexto() {
+		return carta.getCarta();
+	}
+	
 	public boolean isMarcada() {
 	    return marcada;
 	}

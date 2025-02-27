@@ -58,18 +58,6 @@ public class VistaConsola implements IVista {
 	//                COMPORTAMIENTO PROPIO DE LA CONSOLA
 	// *************************************************************
 	
-	/*//Metodo para continuar y no sacar la pantalla de una
-	private void continuar() {
-		System.out.println("Escriba cualquier tecla para continuar...");
-		this.entrada.next();
-		limpiarPantalla();
-	}
-	
-	private void continuar() {
-	    System.out.println("Escriba cualquier tecla para continuar...");
-	    this.entrada.nextLine(); // Ahora siempre lee hasta el final de la línea
-	}*/
-	
 	private void continuar() {
 	    /*System.out.println("Escriba cualquier tecla para continuar...");
 	    try {
@@ -77,6 +65,7 @@ public class VistaConsola implements IVista {
 	    } catch (IOException e) {
 	        e.printStackTrace();  // En caso de que haya un error de entrada
 	    }*/
+		//limpiarPantalla();
 	}
 	
 	//Limpieza de pantalla (en realidad agrega lineas)
@@ -177,7 +166,7 @@ public class VistaConsola implements IVista {
 		boolean salir = conectarJugador();
 		int opcion = -1;
 		while(salir && (opcion != 2)) {
-			limpiarPantalla();
+			//limpiarPantalla();
 			mostrarMenu();
 			
 	        try {
@@ -206,7 +195,7 @@ public class VistaConsola implements IVista {
 				default: //Opcion por default
 					System.out.println("Opcion no valida.");
 			}
-			continuar();
+			//continuar();
 		}
 	}
 	
@@ -313,7 +302,7 @@ public class VistaConsola implements IVista {
 		int cantCartas = this.controlador.cantidadCartasPasaje();
 		String direccion = direccionPasaje();
 		combinacionRondaPasaje();
-		mostrarAviso("Cada jugador debe pasar " + String.valueOf(cantCartas) + " a su " + direccion);
+		mostrarAviso("Cada jugador debe pasar " + String.valueOf(cantCartas) + " de sus cartas. " + direccion);
 	}
 	
 	public String direccionPasaje() throws RemoteException {
@@ -360,7 +349,7 @@ public class VistaConsola implements IVista {
 	        }
 			
 		} else {
-			System.out.println("Esperando al jugador " + jugadorActual + "...");
+			System.out.println("Esperando al jugador " + this.controlador.nombreJugadorActual() + " ...");
 		}
 	}
 	
@@ -401,50 +390,11 @@ public class VistaConsola implements IVista {
 	//                         JUEGO
 	// *************************************************************
 	
-	// ************ PEDIR CARTAS (para tirar en mesa) **************
-	
-	@Override
-	public void pedirCarta() throws RemoteException {
-		String jugadorActual = this.controlador.nombreJugadorActual();
-		
-		if (nombreJugador.equals(jugadorActual)) {
-			combinacionRondaJugada();
-			turnoJugador();
-			
-			continuar();
-			
-			combinacionRondaJugada();
-			turnoJugador();
-			cartasEnMesa();
-			
-			manoJugador();
-			
-			int posCarta;
-			System.out.print("Elija una carta: ");
-			
-			try {
-				posCarta = entrada.nextInt();
-			} catch (Exception e) {
-				posCarta = -1;
-			}
-			
-			controlador.cartaJugada(posCarta - 1); //Paso la carta
-			continuar(); 
-		} else {
-			esperaJugadorActual();
-		}
-
-	}
-	
-	@Override
-	public void esperaJugadorActual() throws RemoteException{
-		System.out.println("Esperando que el jugador " + this.controlador.nombreJugadorActual() + " termine su jugada...");
-	}
-	
 	@Override
 	public void nuevaJugada() throws RemoteException {
+		
 	}
-
+	
 	// ******************** JUGAR DOS DE TREBOL ********************
 
 	@Override
@@ -455,27 +405,92 @@ public class VistaConsola implements IVista {
 		continuar();
 		pedirCarta();
 	}
+	
+	// ************ PEDIR CARTAS (para tirar en mesa) **************
+	
+	@Override
+	public void pedirCarta() throws RemoteException {
+		
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
+			combinacionRondaJugada();
+			turnoJugador();
+			cartasEnMesa();
+			
+			manoJugador();
+
+	        int posCarta = -1;
+	        System.out.print("Elija una carta: ");
+	        
+	        try {
+	            String input = reader.readLine();  // Leer la línea completa de entrada
+	            posCarta = Integer.parseInt(input);  // Convertir la entrada a entero
+	        } catch (IOException e) {
+	            e.printStackTrace();  // En caso de error de entrada
+	        } catch (NumberFormatException e) {
+	            posCarta = -1;  // Si la entrada no es un número válido, asignamos -1
+	            System.out.println("Entrada no válida. Intenta de nuevo.");
+	        }
+	        
+	        if (posCarta >= 1) {
+	            controlador.cartaJugada(posCarta - 1); //Paso la carta
+	        } else {
+	            System.out.println("Número de carta inválido.");
+	        }
+			
+		} else {
+			esperaJugadorActual();
+		}
+	}
+	
+	@Override
+	public void esperaJugadorActual() throws RemoteException{
+		continuar();
+		cartasEnMesa();
+		System.out.println("Esperando al jugador " + this.controlador.nombreJugadorActual() + " ...");
+	}
+	
+	// ****************** CARTA TIRADA VALIDA **********************
+	
+	@Override
+	public void cartaTiradaValida() throws RemoteException {
+		// TODO Auto-generated method stub
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
+			System.out.println("¡Carta tirada valida!");
+		}
+	}
 
 	// ****************** CARTA TIRADA INVALIDA ********************
 	
 	@Override
 	public void cartaTiradaInvalida() throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("La carta que seleccioanste es invalida."
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
+			System.out.println("La carta que seleccionaste es invalida."
 				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
 				+ "Por favor, intentalo denuevo.");
-		continuar();
-		pedirCarta();
+			continuar();
+			pedirCarta();
+		}
 	}
 
 	@Override
 	public void cartaTiradaInvalida2deTrebol() throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("La carta que seleccioanste es invalida."
-				+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
-				+ "Por favor, intentalo denuevo.");
-		continuar();
-		pedirCarta();
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (nombreJugador.equals(jugadorActual)) {
+			System.out.println("La carta que seleccionaste es invalida."
+					+ "Tienes que tirar una carta del mismo palo que la que esta en la mesa."
+					+ "Por favor, intentalo denuevo.");
+			continuar();
+			pedirCarta();
+		}
 	}
 	
 	// ******************** PERDEDOR JUGADA ************************
@@ -483,31 +498,44 @@ public class VistaConsola implements IVista {
 	@Override
 	public void perdedorJugada() throws RemoteException {
 		// TODO Auto-generated method stub
+	
+		combinacionRondaJugada();
+		cartasEnMesa();
 		
+		mostrarAviso("El perdedor de esta jugada es " + this.controlador.jugadorPerdedorJugada() + "\n");
+	
+		continuar();
 	}
 
 	@Override
 	public void corazonesRotos() throws RemoteException {
 		// TODO Auto-generated method stub
-		
+		mostrarAviso("\n" + "CORAZONES ROTOS" + "\n" + "A partir de ahora se pueden tirar corazones" + "\n");
+		continuar();
 	}
 
-	@Override
-	public void cartaTiradaValida() throws RemoteException {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public void finDeRonda() throws RemoteException {
-		// TODO Auto-generated method stub
-		
+		mostrarAviso("****************************\r\n"
+				   + "* 	 FIN DE LA RONDA     *\r\n"
+				   + "****************************");
+		mostrarAviso("Asi estan los puntajes hasta el momento" + "\n");
+		puntaje();
+		continuar();
 	}
 
 	@Override
 	public void finDeJuego() throws RemoteException {
 		// TODO Auto-generated method stub
-		
+		mostrarAviso("****************************\r\n"
+				   + "* 	  FIN DEL JUEGO      *\r\n"
+				   + "****************************");
+		puntaje();
+		mostrarAviso("El ganador fue " + this.controlador.ganadorJuego());
+		mostrarAviso("¡¡¡FELICIDADES!!!");
+		continuar();
 	}
 	
 }

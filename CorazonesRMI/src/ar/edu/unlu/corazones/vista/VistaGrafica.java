@@ -627,10 +627,9 @@ public class VistaGrafica extends JFrame implements IVista {
 		try {
 			String jugadorActual = this.controlador.nombreJugadorActual();
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-				JOptionPane.showMessageDialog(this, "Has seleccionado: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
 				
-				// Volver a mostrar las cartas con los índices actualizados
 			} else {
 				mostrarAviso("Aun no es tu turno. Espera por favor.",tiemposMensajes[0]);
 			}
@@ -838,7 +837,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		try {
 			String jugadorActual = this.controlador.nombreJugadorActual();
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-				JOptionPane.showMessageDialog(this, "Has seleccionado: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
 				
 				// Volver a mostrar las cartas con los índices actualizados

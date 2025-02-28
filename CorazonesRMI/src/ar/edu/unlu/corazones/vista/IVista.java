@@ -57,6 +57,14 @@ public interface IVista {
 	void finDeRonda() throws RemoteException;
 	  
 	void finDeJuego() throws RemoteException;
+	
+	// *************************************************************
+	//						   SERIALIZACION
+	// *************************************************************
+	
+	void serializarGanador() throws RemoteException;
+	
+	void verRankingGandores() throws RemoteException;
 	 
 	
 	// *************************************************************

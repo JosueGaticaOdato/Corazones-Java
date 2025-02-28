@@ -1,12 +1,15 @@
 package ar.edu.unlu.corazones.modelo;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Mazo {
+public class Mazo implements Serializable {
 
 	// *************************************************************
 	//                        CONSTANTES
 	// *************************************************************
+
+	private static final long serialVersionUID = 1L;
 
 	public final int Cant_Cartas = 52;
 	

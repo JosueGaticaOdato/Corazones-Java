@@ -1,5 +1,6 @@
 package ar.edu.unlu.corazones.modelo;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,11 +10,13 @@ import java.util.List;
 import ar.edu.unlu.corazones.observer.Observador;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 
-public class Corazones extends ObservableRemoto implements ICorazones {
+public class Corazones extends ObservableRemoto implements ICorazones, Serializable {
 
 	// *************************************************************
 	// 						CONSTANTES
 	// *************************************************************
+	
+	private static final long serialVersionUID = 1L;
 	
 	private static final int cantCartasRepartidas = 5; // TESTING (13)
 	private static final int cantCartasIntercambio = 1; // TESTING (3)

@@ -1,10 +1,15 @@
 package ar.edu.unlu.corazones.modelo;
 
-public class Jugada {
+import java.io.Serializable;
+
+public class Jugada implements Serializable{
 
 	// *************************************************************
 	//                        CONSTANTES
 	// *************************************************************
+	
+	private static final long serialVersionUID = 1L;
+	
 	
 	private final int DAMADEPICAS = 13;
 	private final int CORAZONES = 1;

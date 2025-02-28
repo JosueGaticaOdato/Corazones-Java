@@ -19,6 +19,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
@@ -34,11 +35,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.modelo.Carta;
+import ar.edu.unlu.corazones.serializacion.AdministradorDeGanadores;
+import ar.edu.unlu.corazones.serializacion.Serializador;
 import ar.edu.unlu.corazones.vista.gui.FondoTapete;
 import ar.edu.unlu.corazones.vista.gui.VistaCarta;
 import ar.edu.unlu.corazones.vista.gui.VistaInicioSesion;
@@ -50,6 +52,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 	// 							CONSTANTES
 	// *************************************************************
+	
+	private static Serializador serializador=new Serializador("src/datos.dat");
 
 	private final String[] fuentes = {"Tahoma","Arial"};
 
@@ -111,9 +115,11 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 	//							CONSTRUCTOR
 	// *************************************************************
+	
+
 
 	public VistaGrafica(Controlador controlador) {
-		
+			
 		this.controlador = controlador;
 		this.controlador.setVista(this);
 
@@ -152,6 +158,8 @@ public class VistaGrafica extends JFrame implements IVista {
             }
         });
 	}
+	
+
 	
 	// *************************************************************
 	// 						CONTROL DE VISTAS
@@ -251,11 +259,12 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	    JButton btnListaJugadores = crearBoton("Ver lista de jugadores", botonAncho, botonAlto);
 	    JButton btnComenzarJuego = crearBoton("Comenzar juego", botonAncho, botonAlto);
+	    JButton btnRankingJugadores = crearBoton("Ranking de ganadores", botonAncho, botonAlto);
 	    JButton btnSalir = crearBoton("Salir", botonAncho, botonAlto);
 
 	    // Imagen/Logo del juego
 	    JLabel imagenLabel = new JLabel(menuCorazones);
-	    imagenLabel.setAlignmentX(Component.CENTER_ALIGNMENT);  // Asegura que la imagen esté centrada
+	    imagenLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	    panelContenido.add(imagenLabel);
 
 	    // Agregar los botones y darles un espaciado
@@ -266,10 +275,11 @@ public class VistaGrafica extends JFrame implements IVista {
 	    panelContenido.add(Box.createVerticalStrut(espaciado));
 	    panelContenido.add(btnListaJugadores);
 	    panelContenido.add(Box.createVerticalStrut(espaciado));
+	    panelContenido.add(btnRankingJugadores);
+	    panelContenido.add(Box.createVerticalStrut(espaciado));
 	    panelContenido.add(btnSalir);
 
-	    // Alinear los botones al centro
-	    panelContenido.setAlignmentX(Component.CENTER_ALIGNMENT);  // Asegura que los botones estén centrados
+	    panelContenido.setAlignmentX(Component.CENTER_ALIGNMENT);  // Botones centrados
 
 	    btnListaJugadores.addActionListener(e -> {
 	        try {
@@ -282,6 +292,14 @@ public class VistaGrafica extends JFrame implements IVista {
 	    btnComenzarJuego.addActionListener(e -> {
 	        try {
 	            iniciarJuego();
+	        } catch (HeadlessException | RemoteException e1) {
+	            e1.printStackTrace();
+	        }
+	    });
+	    
+	    btnComenzarJuego.addActionListener(e -> {
+	        try {
+	            verRankingGandores();
 	        } catch (HeadlessException | RemoteException e1) {
 	            e1.printStackTrace();
 	        }
@@ -1148,11 +1166,44 @@ public class VistaGrafica extends JFrame implements IVista {
 			//JOptionPane.showMessageDialog(this, "El ganador fue " + this.controlador.ganadorJuego(), "FIN DEL JUEGO", JOptionPane.INFORMATION_MESSAGE);
 			mostrarMensajeTemporal("El ganador fue " + this.controlador.ganadorJuego(),tiemposMensajes[1]);
 		}
-		
+		serializarGanador();
 		mostrarVista("menu");
 	}
+	
+	// *************************************************************
+	//						   SERIALIZACION
+	// *************************************************************
 
+	@Override
+	public void serializarGanador() throws RemoteException {
+		String jugadorGanador = this.controlador.ganadorJuego();
+		if (serializador != null) {
+			AdministradorDeGanadores lista=(AdministradorDeGanadores) serializador.readFirstObject();
+			lista.addGanador(jugadorGanador);
+			serializador.writeOneObject(lista);
+			serializador=null;
+		}
+	}
+	
+	@Override
+	public void verRankingGandores() throws RemoteException {
+		
+		//Obtengo la lista de ganadores
+	    AdministradorDeGanadores lista = (AdministradorDeGanadores) serializador.readFirstObject();
+	    ArrayList<String> nombres = lista.getNombresGanadores();
+	    ArrayList<Integer> cantidad = lista.getCantGanadas();
+	    
+	    StringBuilder rankingText = new StringBuilder();
+	    rankingText.append("RANKING DE GANADORES:\n");
+	    rankingText.append("Nombre               Partidas ganadas\n");
+	    rankingText.append("-------------------------------\n");
 
+	    // Agrego gandores y partidas ganadas
+	    for (int i = 0; i < nombres.size(); i++) {
+	        rankingText.append(String.format("%-20s %-10d\n", nombres.get(i), cantidad.get(i)));
+	    }
 
+	    JOptionPane.showMessageDialog(null, rankingText.toString(), "Ranking de Ganadores", JOptionPane.INFORMATION_MESSAGE);
+	}
 
 }

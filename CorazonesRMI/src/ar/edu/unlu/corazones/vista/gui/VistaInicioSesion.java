@@ -2,6 +2,7 @@ package ar.edu.unlu.corazones.vista.gui;
 
 import java.awt.event.ActionListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,6 +15,8 @@ import net.miginfocom.swing.MigLayout;
 
 public class VistaInicioSesion extends JFrame {
 
+	private final ImageIcon iconCorazones = new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/corazon.png"));
+	
 	private JPanel contentPane;
 	private JTextField textUsuario;
 	private JButton btnIniciar;
@@ -22,10 +25,13 @@ public class VistaInicioSesion extends JFrame {
 	 * Create the frame.
 	 */
 	public VistaInicioSesion() {
+		setTitle("Iniciar sesion - Corazones");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 247, 109);
 		setLocationRelativeTo(null);
+		setIconImage(iconCorazones.getImage());
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

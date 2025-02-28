@@ -17,7 +17,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	
 	private static final int cantCartasRepartidas = 13; // TESTING (13)
 	private static final int cantCartasIntercambio = 1; // TESTING (3)
-	private static final int puntajeMaximo = 1; // TESTING (100)
+	private static final int puntajeMaximo = 100; // TESTING (100)
 	private static final int cantJugadores = 4;
 	
 	// *************************************************************

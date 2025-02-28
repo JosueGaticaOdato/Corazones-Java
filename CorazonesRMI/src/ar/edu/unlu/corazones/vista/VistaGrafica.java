@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
@@ -56,6 +57,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	
 	private final int[] tiemposMensajes = {1500, 2500};
 
+	private final ImageIcon menuCorazones = new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/menu.png"));
+	
 	private final ImageIcon iconCorazones = new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/corazon.png"));
 	
 	private final ImageIcon iconoCorazon = new ImageIcon(
@@ -171,6 +174,23 @@ public class VistaGrafica extends JFrame implements IVista {
 		JOptionPane.showMessageDialog(this, mensaje);
 	}
 	
+	private void mostrarMensajeTemporal(String mensaje, int tiempoMilisegundos) {
+	  
+	    JOptionPane pane = new JOptionPane(mensaje, JOptionPane.INFORMATION_MESSAGE);
+	    JDialog dialog = pane.createDialog(this, "Mensaje");
+	    
+	    // Iniciar un Timer para cerrar el diálogo después de X milisegundos
+	    Timer timer = new Timer(tiempoMilisegundos, e -> dialog.dispose());
+	    timer.setRepeats(false); // Solo se ejecuta una vez
+	    timer.start();
+	    
+	    // Mostrar el cuadro de diálogo
+	    dialog.setVisible(true);
+	
+	    // Si el usuario lo cierra antes, detener el Timer
+	    timer.stop();
+	}
+
 	private void mostrarAviso(String mensaje, int tiempo) {
 	    JDialog dialogo = new JDialog(this, "Aviso", false);
 	    dialogo.setLayout(new BorderLayout());
@@ -197,8 +217,9 @@ public class VistaGrafica extends JFrame implements IVista {
 	    new Timer(tiempo, e -> dialogo.dispose()).start();
 
 	    dialogo.setVisible(true);
-	}
-
+	 }
+	
+	
 	// *************************************************************
 	// 							PRE-JUEGO
 	// *************************************************************
@@ -216,78 +237,106 @@ public class VistaGrafica extends JFrame implements IVista {
 	}
 	
 	private void crearMenu() {
-		panelMenu = new JPanel();
-		panelMenu.setLayout(new BorderLayout());
-		panelMenu.setOpaque(false);
+	    panelMenu = new JPanel();
+	    panelMenu.setLayout(new BorderLayout());
+	    panelMenu.setOpaque(false);
 
-		// Panel de botones
-		JPanel panelBotones = new JPanel();
-		panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
-		panelBotones.setOpaque(false);
+	    // Panel de logo + botones
+	    JPanel panelContenido = new JPanel();
+	    panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
+	    panelContenido.setOpaque(false);
 
-		int botonAncho = 200;
-		int botonAlto = 40;
+	    int botonAncho = 200;
+	    int botonAlto = 40;
 
-		JButton btnListaJugadores = crearBoton("Ver lista de jugadores", botonAncho, botonAlto);
-		JButton btnComenzarJuego = crearBoton("Comenzar juego", botonAncho, botonAlto);
-		JButton btnSalir = crearBoton("Salir", botonAncho, botonAlto);
+	    JButton btnListaJugadores = crearBoton("Ver lista de jugadores", botonAncho, botonAlto);
+	    JButton btnComenzarJuego = crearBoton("Comenzar juego", botonAncho, botonAlto);
+	    JButton btnSalir = crearBoton("Salir", botonAncho, botonAlto);
 
-		// Agregar los botones y darles un espaciado
-		int espaciado = 20;
-		
-		panelBotones.add(Box.createVerticalStrut(espaciado));
-		panelBotones.add(btnComenzarJuego);
-		panelBotones.add(Box.createVerticalStrut(espaciado));
-		panelBotones.add(btnListaJugadores);
-		panelBotones.add(Box.createVerticalStrut(espaciado));
-		panelBotones.add(btnSalir);
+	    // Imagen/Logo del juego
+	    JLabel imagenLabel = new JLabel(menuCorazones);
+	    imagenLabel.setAlignmentX(Component.CENTER_ALIGNMENT);  // Asegura que la imagen esté centrada
+	    panelContenido.add(imagenLabel);
 
-		// Centrar botones
-		panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    // Agregar los botones y darles un espaciado
+	    int espaciado = 20;
 
-		btnListaJugadores.addActionListener(e -> {
-			try {
-				listarJugadores();
-			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
+	    panelContenido.add(Box.createVerticalStrut(espaciado));
+	    panelContenido.add(btnComenzarJuego);
+	    panelContenido.add(Box.createVerticalStrut(espaciado));
+	    panelContenido.add(btnListaJugadores);
+	    panelContenido.add(Box.createVerticalStrut(espaciado));
+	    panelContenido.add(btnSalir);
 
-		btnComenzarJuego.addActionListener(e -> {
-			try {
-				iniciarJuego();
-			} catch (HeadlessException | RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
+	    // Alinear los botones al centro
+	    panelContenido.setAlignmentX(Component.CENTER_ALIGNMENT);  // Asegura que los botones estén centrados
 
-		btnSalir.addActionListener(e -> {
-			try {
-				desconectarJugador();
-				System.exit(0);
-			} catch (RemoteException e1) {
-				e1.printStackTrace();
-			} 
-		});
+	    btnListaJugadores.addActionListener(e -> {
+	        try {
+	            listarJugadores();
+	        } catch (RemoteException e1) {
+	            e1.printStackTrace();
+	        }
+	    });
 
-		// Panel de botones en el centro de la pantalla
-		JPanel contenedorBotones = new JPanel();
-		contenedorBotones.setLayout(new GridBagLayout());
-		contenedorBotones.setOpaque(false);
-		contenedorBotones.add(panelBotones);
-		panelMenu.add(contenedorBotones, BorderLayout.CENTER);
+	    btnComenzarJuego.addActionListener(e -> {
+	        try {
+	            iniciarJuego();
+	        } catch (HeadlessException | RemoteException e1) {
+	            e1.printStackTrace();
+	        }
+	    });
 
-		panelPrincipal.add(panelMenu, "menu");
+	    btnSalir.addActionListener(e -> {
+	        try {
+	            desconectarJugador();
+	            System.exit(0);
+	        } catch (RemoteException e1) {
+	            e1.printStackTrace();
+	        }
+	    });
+
+	    // Panel de botones en el centro de la pantalla
+	    JPanel contenedorBotones = new JPanel();
+	    contenedorBotones.setLayout(new GridBagLayout());
+	    contenedorBotones.setOpaque(false);
+	    contenedorBotones.add(panelContenido);
+
+	    // Asegurarse de que el panelContenido esté centrado dentro del panel principal
+	    panelMenu.add(contenedorBotones, BorderLayout.CENTER);
+
+	    panelPrincipal.add(panelMenu, "menu");
 	}
 	
 	// Método para crear botones con tamaño fijo
 	private JButton crearBoton(String texto, int ancho, int alto) {
 		JButton boton = new JButton(texto);
+		
 		boton.setMaximumSize(new Dimension(ancho, alto));
 		boton.setPreferredSize(new Dimension(ancho, alto));
-		boton.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar el botón en el panel
+		boton.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    boton.setFocusPainted(false);
+	    boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+	    boton.setFont(new Font(fuentes[1], Font.BOLD, 16));
+	    boton.setForeground(Color.BLACK);
+	    boton.setBackground(new Color(200, 200, 200));
+
+	    // Efecto hover
+	    boton.addMouseListener(new MouseAdapter() {
+	        @Override
+	        public void mouseEntered(MouseEvent e) {
+	            boton.setBackground(new Color(50, 205, 50));
+	            boton.setForeground(Color.WHITE);
+	        }
+
+	        @Override
+	        public void mouseExited(MouseEvent e) {
+	            boton.setBackground(new Color(200, 200, 200)); 
+	            boton.setForeground(Color.BLACK);
+	        }
+	    });
+	    
+	    
 		return boton;
 	}
 	
@@ -827,6 +876,11 @@ public class VistaGrafica extends JFrame implements IVista {
 	
 	@Override
 	public void jugarDosDeTrebol() throws RemoteException{
+		String jugadorActual = this.controlador.nombreJugadorActual();
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
+			mostrarMensajeTemporal("Como es la primer jugada, usted debe tirar el 2 de trebol",tiemposMensajes[1]);
+		}
 		pedirCarta();
 	}
 	

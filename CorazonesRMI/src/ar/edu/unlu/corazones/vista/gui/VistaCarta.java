@@ -22,6 +22,7 @@ public class VistaCarta extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
+	
 	private final int ANCHO = 60;
 	private final int ALTO = 90;
 	private final int TAMAÑO_FUENTE = 20;

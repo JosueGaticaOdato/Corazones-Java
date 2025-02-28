@@ -19,7 +19,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
@@ -33,27 +32,33 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.modelo.Carta;
-import ar.edu.unlu.corazones.serializacion.AdministradorDeGanadores;
-import ar.edu.unlu.corazones.serializacion.Serializador;
 import ar.edu.unlu.corazones.vista.gui.FondoTapete;
 import ar.edu.unlu.corazones.vista.gui.VistaCarta;
 import ar.edu.unlu.corazones.vista.gui.VistaInicioSesion;
+import ar.edu.unlu.serializacion.Ganadores;
+import ar.edu.unlu.serializacion.JugadorRanking;
+import ar.edu.unlu.serializacion.Serializador;
 
 public class VistaGrafica extends JFrame implements IVista {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static Serializador serializador = new Serializador("src/datos.dat");
 
 	// *************************************************************
 	// 							CONSTANTES
 	// *************************************************************
-	
-	private static Serializador serializador=new Serializador("src/datos.dat");
 
 	private final String[] fuentes = {"Tahoma","Arial"};
 
@@ -122,6 +127,7 @@ public class VistaGrafica extends JFrame implements IVista {
 			
 		this.controlador = controlador;
 		this.controlador.setVista(this);
+		System.out.println(serializador);
 
 		/* CONFIGURACIONES DE VENTANA */
 		setTitle("Corazones");
@@ -297,7 +303,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	        }
 	    });
 	    
-	    btnComenzarJuego.addActionListener(e -> {
+	    btnRankingJugadores.addActionListener(e -> {
 	        try {
 	            verRankingGandores();
 	        } catch (HeadlessException | RemoteException e1) {
@@ -386,7 +392,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		    if (jugadores[i] == null) {
 		        lista.append("(Sin agregar)");
 		    } else if (vInicioSesion.getGetNombreUsuario().equals(jugadores[i])) {
-		        lista.append(jugadores[i]).append(" <-");
+		        lista.append(jugadores[i]).append(" (*)");
 		    } else {
 		        lista.append(jugadores[i]);
 		    }
@@ -1104,8 +1110,8 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void corazonesRotos() throws RemoteException {
 		// TODO Auto-generated method stub
 		actualizarCorazon(true);
-		actualizarEstadoJuego("CORAZONES ROTOS");
-		mostrarAviso("CORAZONES ROTOS",tiemposMensajes[0]);
+		//actualizarEstadoJuego("CORAZONES ROTOS");
+		//mostrarAviso("CORAZONES ROTOS",tiemposMensajes[0]);
 		mostrarAviso("A partir de ahora se puede comenzar con corazones",tiemposMensajes[1]);
 	}
 	
@@ -1160,13 +1166,10 @@ public class VistaGrafica extends JFrame implements IVista {
 		actualizarEstadoJuego("GANADOR DEL JUEGO: " + jugadorGanador + " ¡¡¡FELICIDADES!!!");
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorGanador)) {
-			//JOptionPane.showMessageDialog(this, "¡FELICIDADES, SOS EL GANADOR!", "FIN DEL JUEGO", JOptionPane.INFORMATION_MESSAGE);
 			mostrarMensajeTemporal("¡FELICIDADES, SOS EL GANADOR!",tiemposMensajes[1]);
 		} else {			
-			//JOptionPane.showMessageDialog(this, "El ganador fue " + this.controlador.ganadorJuego(), "FIN DEL JUEGO", JOptionPane.INFORMATION_MESSAGE);
 			mostrarMensajeTemporal("El ganador fue " + this.controlador.ganadorJuego(),tiemposMensajes[1]);
 		}
-		serializarGanador();
 		mostrarVista("menu");
 	}
 	
@@ -1175,35 +1178,81 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 
 	@Override
-	public void serializarGanador() throws RemoteException {
-		String jugadorGanador = this.controlador.ganadorJuego();
-		if (serializador != null) {
-			AdministradorDeGanadores lista=(AdministradorDeGanadores) serializador.readFirstObject();
-			lista.addGanador(jugadorGanador);
-			serializador.writeOneObject(lista);
-			serializador=null;
+	public void serializar(String ganador) {
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(ganador)) {
+			if (serializador!=null) {
+				
+				Ganadores lista=(Ganadores) serializador.readFirstObject();
+				lista.agregarGanador(ganador);
+				serializador.writeOneObject(lista);
+				//serializador=null;
+				
+			}
 		}
+		
 	}
-	
+
 	@Override
 	public void verRankingGandores() throws RemoteException {
-		
-		//Obtengo la lista de ganadores
-	    AdministradorDeGanadores lista = (AdministradorDeGanadores) serializador.readFirstObject();
+	    
+	    // Obtengo la lista de ganadores
+	    Ganadores lista = (Ganadores) serializador.readFirstObject();
 	    ArrayList<String> nombres = lista.getNombresGanadores();
 	    ArrayList<Integer> cantidad = lista.getCantGanadas();
-	    
-	    StringBuilder rankingText = new StringBuilder();
-	    rankingText.append("RANKING DE GANADORES:\n");
-	    rankingText.append("Nombre               Partidas ganadas\n");
-	    rankingText.append("-------------------------------\n");
 
-	    // Agrego gandores y partidas ganadas
+	    // Lista de objetos para ordenar
+	    ArrayList<JugadorRanking> rankingList = new ArrayList<>();
+
 	    for (int i = 0; i < nombres.size(); i++) {
-	        rankingText.append(String.format("%-20s %-10d\n", nombres.get(i), cantidad.get(i)));
+	        rankingList.add(new JugadorRanking(nombres.get(i), cantidad.get(i)));
 	    }
 
-	    JOptionPane.showMessageDialog(null, rankingText.toString(), "Ranking de Ganadores", JOptionPane.INFORMATION_MESSAGE);
+	    // Ordenar por partidas ganadas
+	    rankingList.sort((a, b) -> Integer.compare(b.getCantidad(), a.getCantidad()));
+
+	    // Solo los primeros 5
+	    int top = Math.min(5, rankingList.size());
+	    String[] columnNames = {"Nombre", "Partidas Ganadas"};
+	    Object[][] data = new Object[top][2];
+
+	    for (int i = 0; i < top; i++) {
+	        data[i][0] = rankingList.get(i).getNombre();
+	        data[i][1] = rankingList.get(i).getCantidad();
+	    }
+
+	    // Crear la tabla con modelo no editable
+	    DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false; // Tabla de solo lectura
+	        }
+	    };
+
+	    JTable rankingTable = new JTable(model);
+	    rankingTable.setFillsViewportHeight(true);
+	    rankingTable.setRowHeight(25); // Altura de filas
+
+	    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+	    centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+	    rankingTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+
+	    // Tamaño de columnas
+	    rankingTable.getColumnModel().getColumn(0).setPreferredWidth(150); // Nombre
+	    rankingTable.getColumnModel().getColumn(1).setPreferredWidth(100); // Partidas ganadas
+
+	    // Encabezado
+	    JTableHeader header = rankingTable.getTableHeader();
+	    header.setFont(new Font("Arial", Font.BOLD, 14));
+	    header.setBackground(new Color(200, 200, 200));
+
+	    JScrollPane scrollPane = new JScrollPane(rankingTable);
+	    scrollPane.setPreferredSize(new Dimension(300, 150));
+
+	    // Mostrar en JOptionPane
+	    JOptionPane.showMessageDialog(null, scrollPane, "Ranking de Ganadores", JOptionPane.PLAIN_MESSAGE);
 	}
+
+
 
 }

@@ -62,7 +62,7 @@ public interface IVista {
 	//						   SERIALIZACION
 	// *************************************************************
 	
-	void serializarGanador() throws RemoteException;
+	void serializar(String ganador) throws RemoteException;
 	
 	void verRankingGandores() throws RemoteException;
 	 

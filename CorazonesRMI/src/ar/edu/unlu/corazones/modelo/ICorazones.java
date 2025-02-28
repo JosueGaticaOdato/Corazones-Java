@@ -1,12 +1,13 @@
 package ar.edu.unlu.corazones.modelo;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
 
-public interface ICorazones extends IObservableRemoto{
+public interface ICorazones extends IObservableRemoto, Serializable{
 
 	void iniciarJuego() throws RemoteException;
 

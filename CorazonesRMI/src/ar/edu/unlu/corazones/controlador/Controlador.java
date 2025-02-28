@@ -211,6 +211,7 @@ public class Controlador implements IControladorRemoto {
 				this.vista.finDeRonda();
 				break;
 			case FIN_DE_JUEGO:
+				this.vista.serializar(this.ganadorJuego());
 				this.vista.finDeJuego();
 				break;
 			}

@@ -1,23 +1,24 @@
-package ar.edu.unlu.corazones.serializacion;
+package ar.edu.unlu.serializacion;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-public class AdministradorDeGanadores implements Serializable {
+public class Ganadores implements Serializable {
 	
+
 	private static final long serialVersionUID = 1L;
 	private ArrayList<String> nombres;
 	private ArrayList<Integer> cantidad;
 	
-	public AdministradorDeGanadores() {
+	public Ganadores() {
 		nombres=new ArrayList<String>();
 		cantidad=new ArrayList<Integer>();
 	}
 	
-	public void addGanador(String nombre) {
-		int partidasGanadas = 0;
-		for(int i = 0 ; i < nombres.size() ; i++) {
+	public void agregarGanador(String nombre) {
+		int partidasGanadas=0;
+		for(int i=0;i<nombres.size();i++) {
 			if(nombre.equals(nombres.get(i))) {
-				partidasGanadas=cantidad.get(i) + 1;
+				partidasGanadas=cantidad.get(i)+1;
 				cantidad.remove(i);
 				cantidad.add(i, partidasGanadas);
 			}
@@ -31,7 +32,9 @@ public class AdministradorDeGanadores implements Serializable {
 	public ArrayList<String> getNombresGanadores() {
 		return nombres;
 	}
+	
 	public ArrayList<Integer> getCantGanadas() {
 		return cantidad;
 	}
+	
 }

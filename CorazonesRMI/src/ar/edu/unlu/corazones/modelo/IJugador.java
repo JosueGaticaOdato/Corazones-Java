@@ -1,10 +1,9 @@
 package ar.edu.unlu.corazones.modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
-
-public interface IJugador {
+public interface IJugador extends Serializable{
 
 	void recibirCarta(Carta carta);
 

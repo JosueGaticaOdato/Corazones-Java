@@ -1,4 +1,4 @@
-package ar.edu.unlu.corazones.serializacion;
+package ar.edu.unlu.serializacion;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

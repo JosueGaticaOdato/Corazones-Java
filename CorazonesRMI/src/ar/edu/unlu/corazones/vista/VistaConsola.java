@@ -385,8 +385,13 @@ public class VistaConsola implements IVista {
 				   + "* 	  FIN DEL JUEGO      *\r\n"
 				   + "****************************");
 		puntaje();
-		System.out.println("El ganador fue " + this.controlador.ganadorJuego());
-		System.out.println("¡¡¡FELICIDADES!!!");
+		String jugadorGanador = this.controlador.ganadorJuego();
+		if (nombreJugador.equals(jugadorGanador)) {
+			System.out.println("¡FELICIDADES, SOS EL GANADOR!");
+		} else {			
+			System.out.println("El ganador fue " + this.controlador.ganadorJuego());
+			System.out.println("¡¡¡FELICIDADES!!!");
+		}
 		
 	}
 	

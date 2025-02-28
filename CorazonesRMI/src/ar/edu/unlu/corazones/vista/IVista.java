@@ -37,8 +37,6 @@ public interface IVista {
 	void cartasRepartidas() throws RemoteException;
 	  
 	void pedirCarta() throws RemoteException;
-	
-	void esperaJugadorActual() throws RemoteException;
 	  
 	void jugarDosDeTrebol() throws RemoteException;
 	  

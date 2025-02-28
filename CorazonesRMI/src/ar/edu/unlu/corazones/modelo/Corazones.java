@@ -15,7 +15,7 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 	// 						CONSTANTES
 	// *************************************************************
 	
-	private static final int cantCartasRepartidas = 13; // TESTING (13)
+	private static final int cantCartasRepartidas = 5; // TESTING (13)
 	private static final int cantCartasIntercambio = 1; // TESTING (3)
 	private static final int puntajeMaximo = 100; // TESTING (100)
 	private static final int cantJugadores = 4;
@@ -77,10 +77,11 @@ public class Corazones extends ObservableRemoto implements ICorazones {
 		
 		while (!juegoTerminado) {
 			mazo = new Mazo();
+			ronda = 1;
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			//pasajeDeCartas();
+			pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {

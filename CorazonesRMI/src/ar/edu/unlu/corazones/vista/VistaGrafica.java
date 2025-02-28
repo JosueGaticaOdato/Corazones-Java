@@ -55,7 +55,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	private final int[] tamañoFuentes = {14,12};
 	
-	private final int[] tiemposMensajes = {1500, 2500};
+	private final int[] tiemposMensajes = {2000, 3000};
 
 	private final ImageIcon menuCorazones = new ImageIcon(getClass().getResource("/ar/edu/unlu/corazones/img/menu.png"));
 	
@@ -635,7 +635,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	        vistaCarta.addMouseListener(new MouseAdapter() {
 	            @Override
 	            public void mouseClicked(MouseEvent e) {
-	                jugarCartaPasaje(indice);
+	                jugarCartaPasaje(indice, carta.getCarta());
 	            }
 	            
 	            @Override
@@ -689,15 +689,14 @@ public class VistaGrafica extends JFrame implements IVista {
 			
 		} else {
 			actualizarEstadoJuego("Esperando al jugador " + jugadorActual + "...");
-			esperaJugadorActual();
 		}
 	}
-
-	private void jugarCartaPasaje(int indice) {
+	
+	private void jugarCartaPasaje(int indice, String carta) {
 		try {
 			String jugadorActual = this.controlador.nombreJugadorActual();
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + carta, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
 				
 			} else {
@@ -851,7 +850,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	        vistaCarta.addMouseListener(new MouseAdapter() {
 	            @Override
 	            public void mouseClicked(MouseEvent e) {
-	                jugarCarta(indice);
+	                jugarCarta(indice, carta.getCarta());
 	            }
 	            
 	            @Override
@@ -908,11 +907,11 @@ public class VistaGrafica extends JFrame implements IVista {
 		}
 	}
 	
-	private void jugarCarta(int indice) {
+	private void jugarCarta(int indice, String carta) {
 		try {
 			String jugadorActual = this.controlador.nombreJugadorActual();
 			if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
-				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + indice, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Has seleccionado la carta: " + carta, "Carta Seleccionada", JOptionPane.INFORMATION_MESSAGE);
 				controlador.cartaJugada(indice);
 				
 				// Volver a mostrar las cartas con los índices actualizados
@@ -924,11 +923,6 @@ public class VistaGrafica extends JFrame implements IVista {
 	    } catch (RemoteException e) {
 	        e.printStackTrace();
 	    }
-	}
-	
-	@Override
-	public void esperaJugadorActual() throws RemoteException {
-		
 	}
 	
 
@@ -944,28 +938,6 @@ public class VistaGrafica extends JFrame implements IVista {
 			removerCartaDeLaMano(this.controlador.getCartaAJugar());
 			
 		}
-		
-		System.out.println("Carta tirada valida");
-		
-		System.out.println("*      CARTAS EN MESA      *");
-		System.out.println();
-		Carta[] cartasEnMesa = this.controlador.cartasEnMesa();
-		for (int i = 0; i < cartasEnMesa.length ; i++) {
-			
-			Carta carta = cartasEnMesa[i];
-			
-			if (carta != null) {
-				System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
-						": " + carta.mostrarCarta());
-			} else {
-				System.out.println((i+1) + ") " + this.controlador.getJugador(i) +
-						": " + "sin jugar");
-			}
-			
-		}
-		System.out.println();
-		System.out.println("****************************");
-		System.out.println();
 		
 		//Cada vez que se tira una carta, se tiene que actualizar la mesa de cada jugador
 		actualizarMesa();
@@ -1115,7 +1087,8 @@ public class VistaGrafica extends JFrame implements IVista {
 		// TODO Auto-generated method stub
 		actualizarCorazon(true);
 		actualizarEstadoJuego("CORAZONES ROTOS");
-		mostrarAviso("A partir se pueden comenzar con corazones",tiemposMensajes[0]);
+		mostrarAviso("CORAZONES ROTOS",tiemposMensajes[0]);
+		mostrarAviso("A partir de ahora se puede comenzar con corazones",tiemposMensajes[1]);
 	}
 	
 	// *************************************************************
@@ -1123,14 +1096,22 @@ public class VistaGrafica extends JFrame implements IVista {
 	// *************************************************************
 
 	private String puntaje() throws RemoteException {
-		String s = "*          PUNTAJE         *" + "\n";
-		s  += "\n";
-		int[] puntajes = this.controlador.puntajesJugadores();
-		for (int i = 0; i < puntajes.length; i++) {
-			s += (i+1) + ") " + this.controlador.getJugador(i) + 
-					" -> " + puntajes[i] + "\n";
-		}
-		return s;
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("*          PUNTAJE         *\n");
+	    sb.append("\n");
+	    
+	    // Espaciado para alinear columnas
+	    String formato = "%-20s %-5s\n";  // Alineacion a la izquierda para numeros y jugadores
+
+	    sb.append(String.format(formato, "Jugador", "Puntaje"));
+	    sb.append("----------------------------\n");
+
+	    int[] puntajes = this.controlador.puntajesJugadores();
+	    for (int i = 0; i < puntajes.length; i++) {
+	        sb.append(String.format(formato, this.controlador.getJugador(i), puntajes[i]));
+	    }
+	    
+	    return sb.toString();
 	}
 	
 	// *************************************************************
@@ -1141,8 +1122,9 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void finDeRonda() throws RemoteException {
 		// TODO Auto-generated method stub
 		actualizarEstadoJuego("FIN DE RONDA");
-		mostrarAviso("FIN DE LA RONDA", tiemposMensajes[0]);
-		mostrarAviso(puntaje(), tiemposMensajes[1]);
+		
+		//mostrarAviso("FIN DE LA RONDA", tiemposMensajes[0]);
+		mostrarMensajeTemporal(puntaje(), tiemposMensajes[1]);
 		actualizarRonda();
 		actualizarCorazon(false);
 	}
@@ -1155,11 +1137,18 @@ public class VistaGrafica extends JFrame implements IVista {
 	public void finDeJuego() throws RemoteException {
 		// TODO Auto-generated method stub
 		actualizarEstadoJuego("FIN DEL JUEGO");
-		mostrarAviso("FIN DEL JUEGO",tiemposMensajes[0]);
+		mostrarMensajeTemporal("FIN DEL JUEGO",tiemposMensajes[0]);
 		String jugadorGanador = this.controlador.ganadorJuego();
 		actualizarEstadoJuego("GANADOR DEL JUEGO: " + jugadorGanador + " ¡¡¡FELICIDADES!!!");
-		mostrarAviso(
-		puntaje() + "\n" + "El ganador fue " + this.controlador.ganadorJuego() + "\n" + "¡¡¡FELICIDADES!!!",tiemposMensajes[1]);
+		
+		if (vInicioSesion.getGetNombreUsuario().equals(jugadorGanador)) {
+			//JOptionPane.showMessageDialog(this, "¡FELICIDADES, SOS EL GANADOR!", "FIN DEL JUEGO", JOptionPane.INFORMATION_MESSAGE);
+			mostrarMensajeTemporal("¡FELICIDADES, SOS EL GANADOR!",tiemposMensajes[1]);
+		} else {			
+			//JOptionPane.showMessageDialog(this, "El ganador fue " + this.controlador.ganadorJuego(), "FIN DEL JUEGO", JOptionPane.INFORMATION_MESSAGE);
+			mostrarMensajeTemporal("El ganador fue " + this.controlador.ganadorJuego(),tiemposMensajes[1]);
+		}
+		
 		mostrarVista("menu");
 	}
 

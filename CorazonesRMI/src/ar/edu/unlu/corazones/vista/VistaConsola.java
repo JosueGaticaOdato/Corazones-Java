@@ -452,8 +452,7 @@ public class VistaConsola implements IVista {
 		}
 	}
 	
-	@Override
-	public void esperaJugadorActual() throws RemoteException{
+	private void esperaJugadorActual() throws RemoteException{
 		continuar();
 		cartasEnMesa();
 		System.out.println("Esperando al jugador " + this.controlador.nombreJugadorActual() + " ...");

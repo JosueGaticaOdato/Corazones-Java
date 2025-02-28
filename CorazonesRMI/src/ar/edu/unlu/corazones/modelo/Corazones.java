@@ -84,7 +84,7 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			pasajeDeCartas();
+			//pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {
@@ -102,7 +102,7 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 				
 				/*1 JUGADA POR CADA JUGADOR*/
 				while (i < cantJugadores) {
-					notificarObservadores(EventosCorazones.PEDIR_CARTA);
+					
 					jugarCarta(jugada);
 					i++;
 				}
@@ -179,12 +179,12 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 	        tengoDosDeTrebol = getJugadores()[pos].tengoDosDeTrebol();
 	        if (tengoDosDeTrebol) {
 	            turno = pos;
-	            notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
 
 	            boolean dosDeTrebolTirado = false;
 
 	            // Hasta que el jugador no tire el 2 de trébol, el juego no arranca
 	            while (!dosDeTrebolTirado) {
+	            	notificarObservadores(EventosCorazones.JUGAR_2_DE_TREBOL);
 	                
 	                // Espero a que la carta que se juega sea valida
 	                while (cartaAJugar == null) {
@@ -205,10 +205,14 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 	                    // Avanzar el turno al siguiente jugador
 	                    turno = (turno + 1) % cantJugadores;
 	                    dosDeTrebolTirado = true;
-	                    cartaAJugar = null;
+	                    //cartaAJugar = null;
+	                    
+	                    System.out.println("Dos de trebol true");
 
 	                } else {
 	                    // Notificar que la carta tirada no es válida
+	                	
+	                    System.out.println("Dos de trebol false");
 	                    notificarObservadores(EventosCorazones.CARTA_TIRADA_INVALIDA_2_DE_TREBOL);
 	                    cartaAJugar = null; // Reiniciar para esperar una nueva carta valida
 	                }
@@ -217,12 +221,16 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 	            pos++; //Voy al siguiente jugador para saber si tiene el 2 de trebol
 	        }
 	    }
+	    // Para la proxima jugada, se reinicia la cartaAJugar para que funcione el ciclo
+	    cartaAJugar = null;
 	}
 	
 	private void jugarCarta(Jugada jugada) throws RemoteException {
 	    boolean cartaTiradaValida = false;
 	    
 	    while (!cartaTiradaValida) {
+	    	
+	    	notificarObservadores(EventosCorazones.PEDIR_CARTA);
 	    	
 		    // Espero a que la carta que se juega sea valida
 		    while (cartaAJugar == null) {
@@ -320,7 +328,6 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 			
 			for (int i = 0; i < cantCartasIntercambio; i++) {
 				// Obntego la carta que jugo el jugador
-				notificarObservadores(EventosCorazones.PEDIR_CARTA_PASAJE);			    
 				cartaTiradaValidaPasaje(cartasIntercambio);
 				cartasIntercambio[i] = this.cartaAJugar;
 				cartaAJugar = null;
@@ -345,6 +352,8 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 		
 		boolean cartaTiradaValida = false;
 		while ( !cartaTiradaValida ) {
+			
+			notificarObservadores(EventosCorazones.PEDIR_CARTA_PASAJE);	
 			
 			 // Espero a que la carta que se juega sea valida
 		    while (cartaAJugar == null) {

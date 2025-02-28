@@ -26,6 +26,10 @@ public class Carta implements Serializable {
 		valorCarta();
 	}
 	
+	public Carta() {
+		
+	}
+	
 	// *************************************************************
 	//                       COMPORTAMIENTO
 	// *************************************************************
@@ -55,6 +59,10 @@ public class Carta implements Serializable {
 		}
 	}
 	
+	public boolean isCartaVacia() {
+	    return this.valor == 0 && this.palo == null;
+	}
+	
 	// *************************************************************
 	//                      	GETTERS
 	// *************************************************************
@@ -74,6 +82,8 @@ public class Carta implements Serializable {
 	public String getCarta() {
 		return String.valueOf(this.getValor()) + " - " + getPalo();
 	}
+	
+	
 	
 	// *************************************************************
 	//                      	SETTERS

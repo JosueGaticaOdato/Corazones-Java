@@ -9,6 +9,9 @@ import java.util.Scanner;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.modelo.Carta;
+import ar.edu.unlu.serializacion.Ganadores;
+import ar.edu.unlu.serializacion.JugadorRanking;
+import ar.edu.unlu.serializacion.Serializador;
 
 public class VistaConsola implements IVista {
 
@@ -16,11 +19,9 @@ public class VistaConsola implements IVista {
 	//                       CONSTANTES
 	// *************************************************************
 	
+	private static Serializador serializador = new Serializador("src/datos.dat");
+	
 	private final int lineas = 50; //para el salto de linea
-	
-	private final int[] tiemposMensajes = {1500, 2500};
-	
-	
 
 	// *************************************************************
 	//                       ATRIBUTOS
@@ -29,6 +30,8 @@ public class VistaConsola implements IVista {
 	private Scanner entrada;
 	
 	private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+	
+	private boolean menu;
 	
 	private Controlador controlador;
 	
@@ -43,6 +46,7 @@ public class VistaConsola implements IVista {
 	//Creo la instancia para que el usuario pueda ingresar los datos
 	public VistaConsola(Controlador controlador) {
 		this.entrada = new Scanner(System.in);
+		menu = true;
 		
 		this.controlador = controlador;
 		this.controlador.setVista(this);
@@ -59,12 +63,12 @@ public class VistaConsola implements IVista {
 	// *************************************************************
 	
 	private void continuar() {
-	    /*System.out.println("Escriba cualquier tecla para continuar...");
+	    System.out.println("Escriba cualquier tecla para continuar...");
 	    try {
-	        reader.readLine(); // Lee una línea completa de entrada
+	        reader.readLine(); 
 	    } catch (IOException e) {
-	        e.printStackTrace();  // En caso de que haya un error de entrada
-	    }*/
+	        e.printStackTrace(); 
+	    }
 		//limpiarPantalla();
 	}
 	
@@ -152,10 +156,6 @@ public class VistaConsola implements IVista {
 		System.out.println();
 	}
 	
-	private void mostrarAviso(String mensaje) {
-		System.out.println(mensaje);
-	}
-	
 	// *************************************************************
 	//                         PRE-JUEGO
 	// *************************************************************
@@ -164,38 +164,38 @@ public class VistaConsola implements IVista {
 	public void iniciar() throws RemoteException {
 		
 		boolean salir = conectarJugador();
-		int opcion = -1;
-		while(salir && (opcion != 2)) {
+		String opcion = "";
+		while(salir && menu) {
 			//limpiarPantalla();
 			mostrarMenu();
 			
 	        try {
-	            String input = reader.readLine();  // Lee la línea completa
-	            opcion = Integer.parseInt(input);  // Convierte la entrada a entero
+	            opcion = reader.readLine();  // Lee la línea completa
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        } catch (NumberFormatException e) {
 	            System.out.println("Opción no válida.");
 	        }
 	        
-	        
-			//int opcion = this.entrada.nextInt();
 			limpiarPantalla();
 			switch (opcion) {
-				case 1: //Mostrar lista de jugadores 
+				case "L": //Mostrar lista de jugadores 
 					listaJugadores();
 					break;
-				case 2: //Comenzar juego
+				case "R": //Rankings
+					verRankingGandores();
+					break;
+				case "C": //Comenzar juego
 					jugar();
 					break;
-				case 0: //Salir del juego
+				case "S": //Salir del juego
 					salir = false;
 					desconectarJugador();
 					break;
 				default: //Opcion por default
 					System.out.println("Opcion no valida.");
 			}
-			//continuar();
+			continuar();
 		}
 	}
 	
@@ -207,11 +207,12 @@ public class VistaConsola implements IVista {
 		System.out.println();
 		System.out.println("Seleccione una opcion:");
 		System.out.println("----------------------");
-		System.out.println("1 - Ver lista de jugadores");
-		System.out.println("2 - Comenzar juego");
+		System.out.println("L - Ver lista de jugadores");
+		System.out.println("R - Ver Rankings de ganadores");
+		System.out.println("C - Comenzar juego");
 		System.out.println("----------------------");
 		System.out.println();
-		System.out.println("0 - Salir");
+		System.out.println("S - Salir");
 		System.out.print("Opcion: ");
 	}
 	
@@ -270,7 +271,7 @@ public class VistaConsola implements IVista {
 	public void jugar() throws RemoteException {
 		if ( this.controlador.isCantidadJugadoresValida() ) {
 			//System.out.println("Juego comenzado!");
-			corazonesRotos = "";
+			menu = false;
 			/*continuar();
 			controlador.iniciarJuego();*/
 			//Lo ejecuto en un hilo separado para no bloquear la vista
@@ -294,7 +295,11 @@ public class VistaConsola implements IVista {
 	
 	@Override
 	public void cartasRepartidas() throws RemoteException {
-		mostrarAviso("Repartiendo cartas!");
+		//Caso donde otro jugador decidio comenzar, tnego que cortar el bluce de iniciar()
+		
+		corazonesRotos = "";
+		menu = false;
+		System.out.println("Repartiendo cartas!");
 	}
 	
 	// ************ PANTALLA PARA PASAJE X JUGADOR *****************
@@ -304,7 +309,7 @@ public class VistaConsola implements IVista {
 		int cantCartas = this.controlador.cantidadCartasPasaje();
 		String direccion = direccionPasaje();
 		combinacionRondaPasaje();
-		mostrarAviso("Cada jugador debe pasar " + String.valueOf(cantCartas) + " de sus cartas. " + direccion);
+		System.out.println("Cada jugador debe pasar " + String.valueOf(cantCartas) + " de sus cartas. " + direccion);
 	}
 	
 	public String direccionPasaje() throws RemoteException {
@@ -325,7 +330,6 @@ public class VistaConsola implements IVista {
 		
 		if (nombreJugador.equals(jugadorActual)) {
 			
-			System.out.println("Es tu turno para pasar cartas!");
 			continuar();
 			combinacionRondaPasaje();
 			turnoJugador();
@@ -335,15 +339,16 @@ public class VistaConsola implements IVista {
 	        System.out.print("Elija una carta: ");
 	        
 	        try {
-	            String input = reader.readLine();  // Leer la línea completa de entrada
-	            posCarta = Integer.parseInt(input);  // Convertir la entrada a entero
+	            String input = reader.readLine();  
+	            posCarta = Integer.parseInt(input); 
 	        } catch (IOException e) {
-	            e.printStackTrace();  // En caso de error de entrada
+	            e.printStackTrace(); 
 	        } catch (NumberFormatException e) {
-	            posCarta = -1;  // Si la entrada no es un número válido, asignamos -1
+	            posCarta = -1; 
 	            System.out.println("Entrada no válida. Intenta de nuevo.");
 	        }
 	        
+	        System.out.println("posCarta: " + posCarta);
 	        if (posCarta >= 1) {
 	            controlador.cartaJugadaPasaje(posCarta - 1);
 	        } else {
@@ -378,7 +383,7 @@ public class VistaConsola implements IVista {
 		
 		if (nombreJugador.equals(jugadorActual)) {
 			Carta cartaAJugar = this.controlador.getCartaAJugar();	
-			mostrarAviso("Jugaste la carta " + cartaAJugar.getCarta());
+			System.out.println("Jugaste la carta " + cartaAJugar.getCarta());
 		}
 	}
 	
@@ -387,7 +392,7 @@ public class VistaConsola implements IVista {
 	@Override
 	public void finPasajeDeCartas() throws RemoteException {
 		// TODO Auto-generated method stub
-		mostrarAviso("****************************\r\n"
+		System.out.println("****************************\r\n"
 				+ "* FIN DEL PASAJE DE CARTAS *\r\n"
 				+ "*    COMIENZA LA RONDA     *\r\n"
 				+ "****************************");
@@ -399,7 +404,7 @@ public class VistaConsola implements IVista {
 	
 	@Override
 	public void nuevaJugada() throws RemoteException {
-		
+		System.out.println("¡Comienza una nueva jugada!");
 	}
 	
 	// ******************** JUGAR DOS DE TREBOL ********************
@@ -431,15 +436,16 @@ public class VistaConsola implements IVista {
 	        System.out.print("Elija una carta: ");
 	        
 	        try {
-	            String input = reader.readLine();  // Leer la línea completa de entrada
-	            posCarta = Integer.parseInt(input);  // Convertir la entrada a entero
+	            String input = reader.readLine(); 
+	            posCarta = Integer.parseInt(input);
 	        } catch (IOException e) {
-	            e.printStackTrace();  // En caso de error de entrada
+	            e.printStackTrace();  
 	        } catch (NumberFormatException e) {
-	            posCarta = -1;  // Si la entrada no es un número válido, asignamos -1
+	            posCarta = -1; 
 	            System.out.println("Entrada no válida. Intenta de nuevo.");
 	        }
 	        
+	        System.out.println("posCarta: " + posCarta);
 	        if (posCarta >= 1) {
 	        	System.out.println("Posicion: " + posCarta);
 	            controlador.cartaJugada(posCarta - 1); //Paso la carta
@@ -509,7 +515,7 @@ public class VistaConsola implements IVista {
 		combinacionRondaJugada();
 		cartasEnMesa();
 		
-		mostrarAviso("El perdedor de esta jugada es " + this.controlador.jugadorPerdedorJugada() + "\n");
+		System.out.println("El perdedor de esta jugada es " + this.controlador.jugadorPerdedorJugada() + "\n");
 	
 		continuar();
 	}
@@ -517,7 +523,7 @@ public class VistaConsola implements IVista {
 	@Override
 	public void corazonesRotos() throws RemoteException {
 		// TODO Auto-generated method stub
-		mostrarAviso("\n" + "CORAZONES ROTOS" + "\n" + "A partir se pueden comenzar con corazones" + "\n");
+		System.out.println("\n" + "CORAZONES ROTOS" + "\n" + "A partir se pueden comenzar con corazones" + "\n");
 		continuar();
 	}
 
@@ -525,10 +531,10 @@ public class VistaConsola implements IVista {
 
 	@Override
 	public void finDeRonda() throws RemoteException {
-		mostrarAviso("****************************\r\n"
+		System.out.println("****************************\r\n"
 				   + "* 	 FIN DE LA RONDA     *\r\n"
 				   + "****************************");
-		mostrarAviso("Asi estan los puntajes hasta el momento" + "\n");
+		System.out.println("Asi estan los puntajes hasta el momento" + "\n");
 		puntaje();
 		continuar();
 	}
@@ -536,13 +542,69 @@ public class VistaConsola implements IVista {
 	@Override
 	public void finDeJuego() throws RemoteException {
 		// TODO Auto-generated method stub
-		mostrarAviso("****************************\r\n"
+		System.out.println("****************************\r\n"
 				   + "* 	  FIN DEL JUEGO      *\r\n"
 				   + "****************************");
 		puntaje();
-		mostrarAviso("El ganador fue " + this.controlador.ganadorJuego());
-		mostrarAviso("¡¡¡FELICIDADES!!!");
+		System.out.println("El ganador fue " + this.controlador.ganadorJuego());
+		System.out.println("¡¡¡FELICIDADES!!!");
 		continuar();
+	}
+	
+	// *************************************************************
+	//						   SERIALIZACION
+	// *************************************************************
+	
+	@Override
+	public void serializar(String ganador) {
+		
+		if (nombreJugador.equals(ganador)) {
+			if (serializador!=null) {
+				
+				Ganadores lista=(Ganadores) serializador.readFirstObject();
+				lista.agregarGanador(ganador);
+				serializador.writeOneObject(lista);
+				//serializador=null;
+				
+			}
+		}
+		
+	}
+
+	@Override
+	public void verRankingGandores() throws RemoteException {
+	    
+	    // Obtengo la lista de ganadores
+	    Ganadores lista = (Ganadores) serializador.readFirstObject();
+	    ArrayList<String> nombres = lista.getNombresGanadores();
+	    ArrayList<Integer> cantidad = lista.getCantGanadas();
+
+	    // Lista de objetos para ordenar
+	    ArrayList<JugadorRanking> rankingList = new ArrayList<>();
+
+	    for (int i = 0; i < nombres.size(); i++) {
+	        rankingList.add(new JugadorRanking(nombres.get(i), cantidad.get(i)));
+	    }
+
+	    // Ordenar por partidas ganadas
+	    rankingList.sort((a, b) -> Integer.compare(b.getCantidad(), a.getCantidad()));
+
+	    // Solo los primeros 5 jugadores
+	    int top = Math.min(5, rankingList.size());
+
+	    System.out.println("*****************************************");
+	    System.out.println("*           Ranking de ganadores        *");
+	    System.out.println("*****************************************");
+	    System.out.println("*      Nombre         | Partidas Ganadas*");
+	    System.out.println("*****************************************");
+
+	    for (int i = 0; i < top; i++) {
+	        String nombre = String.format("%-20s", rankingList.get(i).getNombre());  // Alinear a la izquierda
+	        String partidas = String.format("%-16d", rankingList.get(i).getCantidad()); // Alinear a la derecha
+	        System.out.println("* " + nombre + "| " + partidas + "*");
+	    }
+
+	    System.out.println("*****************************************");
 	}
 	
 }

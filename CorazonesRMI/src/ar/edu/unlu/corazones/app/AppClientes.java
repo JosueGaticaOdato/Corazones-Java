@@ -16,7 +16,7 @@ public class AppClientes {
         String ipServidor = "127.0.0.1";
         int portServidor = 8888;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
             int portCliente = 9991 + i; // Puertos 9991, 9992, 9993, 9994
             new Thread(() -> iniciarCliente(ipCliente, portCliente, ipServidor, portServidor)).start();
         }

@@ -127,7 +127,7 @@ public class VistaGrafica extends JFrame implements IVista {
 			
 		this.controlador = controlador;
 		this.controlador.setVista(this);
-		System.out.println(serializador);
+		//System.out.println(serializador);
 
 		/* CONFIGURACIONES DE VENTANA */
 		setTitle("Corazones");
@@ -159,7 +159,7 @@ public class VistaGrafica extends JFrame implements IVista {
             @Override
             public void windowClosing(WindowEvent e) {
                 controlador.desconectarJugador();
-                System.out.println("Jugador desconectado correctamente.");
+                ////System.out.println("Jugador desconectado correctamente.");
                 dispose(); 
             }
         });
@@ -173,7 +173,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	public void mostrarVista(String vista) {
 		cardLayout.show(panelPrincipal, vista);
-		System.out.println("CAMBIO DE VISTA A: " + vista);
+		//System.out.println("CAMBIO DE VISTA A: " + vista);
 	}
 	
 	// *************************************************************
@@ -708,7 +708,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 			
-			System.out.println("Pedir cartas pasaje");
+			//System.out.println("Pedir cartas pasaje");
 			actualizarEstadoJuego("ES TU TURNO PARA PASAR CARTAS");
 			
 		} else {
@@ -772,7 +772,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	                if (subComp instanceof VistaCarta vistaSubCarta) {
 	                    if (vistaSubCarta.getCarta().getPalo() == carta.getPalo() && 
 								vistaSubCarta.getCarta().getValor() == carta.getValor()) {
-	                        System.out.println("Carta marcada con borde azul");
+	                        //System.out.println("Carta marcada con borde azul");
 
 	                        //Borde azul para carta tirada
 	                        vistaSubCarta.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
@@ -923,7 +923,7 @@ public class VistaGrafica extends JFrame implements IVista {
 		if (vInicioSesion.getGetNombreUsuario().equals(jugadorActual)) {
 			
 			mostrarCartasJugador(this.controlador.manoJugador(vInicioSesion.getGetNombreUsuario()));
-			System.out.println("Pedir cartas");
+			//System.out.println("Pedir cartas");
 			actualizarEstadoJuego("ES TU TURNO - SELECCIONA UNA CARTA");
 			
 		} else {
@@ -977,7 +977,7 @@ public class VistaGrafica extends JFrame implements IVista {
 						if (vistaSubCarta.getCarta().getPalo() == carta.getPalo() && 
 								vistaSubCarta.getCarta().getValor() == carta.getValor()) {
 
-	                        System.out.println("Chau carta");
+	                        //System.out.println("Chau carta");
 	                        contenedorCartas.remove(panelCarta);
 	                        
 	                        // Refrescar la vista del contenedor
@@ -1222,12 +1222,7 @@ public class VistaGrafica extends JFrame implements IVista {
 	    }
 
 	    // Crear la tabla con modelo no editable
-	    DefaultTableModel model = new DefaultTableModel(data, columnNames) {
-	        @Override
-	        public boolean isCellEditable(int row, int column) {
-	            return false; // Tabla de solo lectura
-	        }
-	    };
+	    DefaultTableModel model = new DefaultTableModel(data, columnNames);
 
 	    JTable rankingTable = new JTable(model);
 	    rankingTable.setFillsViewportHeight(true);

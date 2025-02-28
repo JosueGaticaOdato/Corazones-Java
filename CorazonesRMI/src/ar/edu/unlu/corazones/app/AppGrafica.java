@@ -6,12 +6,11 @@ import javax.swing.JOptionPane;
 
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.vista.IVista;
-import ar.edu.unlu.corazones.vista.VistaConsola;
 import ar.edu.unlu.corazones.vista.VistaGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
 
-public class AppCliente {
+public class AppGrafica {
 
 	public static void main(String[] args) throws RemoteException {
 		/*ArrayList<String> ips = Util.getIpDisponibles();
@@ -52,8 +51,8 @@ public class AppCliente {
 		);*/
 		//IVista vista = new VistaConsola();
 		Controlador controlador = new Controlador();
-		//IVista vista = new VistaGrafica(controlador);
-		IVista vista = new VistaConsola(controlador);
+		IVista vista = new VistaGrafica(controlador);
+		//IVista vista = new VistaConsola(controlador);
 		Cliente c = new Cliente(ip, Integer.parseInt(port), ipServidor, Integer.parseInt(portServidor));	
 		try {
 			System.out.println("Iniciando controlador remoto...");
@@ -68,5 +67,5 @@ public class AppCliente {
 			e.printStackTrace();
 		}
 	}
-
+	
 }

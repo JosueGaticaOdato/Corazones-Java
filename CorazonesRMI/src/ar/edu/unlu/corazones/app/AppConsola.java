@@ -7,11 +7,10 @@ import javax.swing.JOptionPane;
 import ar.edu.unlu.corazones.controlador.Controlador;
 import ar.edu.unlu.corazones.vista.IVista;
 import ar.edu.unlu.corazones.vista.VistaConsola;
-import ar.edu.unlu.corazones.vista.VistaGrafica;
 import ar.edu.unlu.rmimvc.RMIMVCException;
 import ar.edu.unlu.rmimvc.cliente.Cliente;
 
-public class AppCliente {
+public class AppConsola {
 
 	public static void main(String[] args) throws RemoteException {
 		/*ArrayList<String> ips = Util.getIpDisponibles();
@@ -68,5 +67,4 @@ public class AppCliente {
 			e.printStackTrace();
 		}
 	}
-
 }

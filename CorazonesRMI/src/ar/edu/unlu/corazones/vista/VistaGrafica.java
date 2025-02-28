@@ -487,7 +487,7 @@ public class VistaGrafica extends JFrame implements IVista {
 
 	    // Tamaño fijo de panel
 	    int anchoPanel = carta.getAncho(); 
-	    int altoPanel = carta.getAlto() + 30; //Para el espacio con el JLabel
+	    int altoPanel = carta.getAlto();
 	    panelJugador.setPreferredSize(new Dimension(anchoPanel, altoPanel));
 
 	    JLabel labelNombre = new JLabel(nombre, SwingConstants.CENTER);

@@ -3,7 +3,6 @@ package ar.edu.unlu.corazones.vista.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -119,7 +118,6 @@ public class VistaCarta extends JPanel {
 		return carta;
 	}
 
-
 	public void setCarta(Carta carta) {
 		this.carta = carta;
 	}
@@ -137,12 +135,10 @@ public class VistaCarta extends JPanel {
 	}
 
 	public int getAncho() {
-		// TODO Auto-generated method stub
 		return this.ANCHO;
 	}
 	
 	public int getAlto() {
-		// TODO Auto-generated method stub
 		return this.ALTO;
 	}
 	

@@ -28,6 +28,8 @@ public class VistaConsola implements IVista {
 	
 	private String nombreJugador;
 	
+	private boolean mostrarMenu;
+	
 	private String corazonesRotos;
 	
 	// *************************************************************
@@ -37,6 +39,7 @@ public class VistaConsola implements IVista {
 	//Creo la instancia para que el usuario pueda ingresar los datos
 	public VistaConsola(Controlador controlador) {
 		this.entrada = new Scanner(System.in);
+		
 		
 		this.controlador = controlador;
 		this.controlador.setVista(this);
@@ -132,8 +135,70 @@ public class VistaConsola implements IVista {
 	
 	@Override
 	public void iniciar() throws RemoteException {
+		mostrarMenu = true;
 		conectarJugador();
-		System.out.println("Esperando a que uno de los jugadores comienze....");
+		String opcion = "";
+		while (mostrarMenu) {
+			mostrarMenu();
+			
+			opcion = this.entrada.next();
+			
+			switch (opcion) {
+				case "L": //Mostrar lista de jugadores 
+					listaJugadores();
+					break;
+				case "R": //Rankings
+					verRankingGandores();
+					break;
+				case "C": //Comenzar juego
+					jugar();
+					break;
+				case "S": //Salir del juego
+					mostrarMenu = false;
+					desconectarJugador();
+					break;
+				default: //Opcion por default
+					//System.out.println("Opcion no valida.");
+			}
+		}
+	}
+	
+	
+	//Menu principal del program
+	private void mostrarMenu() {
+		System.out.println("****************************");
+		System.out.println("*    	 CORAZONES         *");
+		System.out.println("****************************");
+		System.out.println();
+		System.out.println("Seleccione una opcion:");
+		System.out.println("----------------------");
+		System.out.println("L - Ver lista de jugadores");
+		System.out.println("R - Ver Rankings de ganadores");
+		System.out.println("C - Comenzar juego");
+		System.out.println("----------------------");
+		System.out.println();
+		System.out.println("S - Salir");
+		System.out.print("Opcion: ");
+	}
+	
+	// ******************* LISTA DE JUGADORES  *********************
+	
+	private void listaJugadores() throws RemoteException {
+		System.out.println("\n" + "Lista de jugadores:");
+		String[] jugadores = controlador.listaJugadores();
+		String s = "\n";
+		for (int i = 0; i < controlador.cantidadJugadores(); i++) {
+			s += (i+1) + ") Jugador: "; 
+			if (jugadores[i] == null) {
+				s += "(Sin agregar)";
+			} else if (nombreJugador.equals(jugadores[i])){
+				s += jugadores[i] + " <-"; 
+			} else {
+				s += jugadores[i];
+			}
+			s += "\n";
+		}
+		System.out.println(s);
 	}
 	
 	// ****************** JUGADOR DESCONECTADO *********************
@@ -165,6 +230,29 @@ public class VistaConsola implements IVista {
 	}
 	
 	// *************************************************************
+	//                         JUGAR
+	// *************************************************************
+	
+	public void jugar() throws RemoteException {
+		if ( this.controlador.isCantidadJugadoresValida() ) {
+			//System.out.println("Juego comenzado!");
+			mostrarMenu = false;
+			/*continuar();
+			controlador.iniciarJuego();*/
+			//Lo ejecuto en un hilo separado para no bloquear la vista
+			new Thread(() -> {
+	            try {
+	                controlador.iniciarJuego();
+	            } catch (RemoteException e) {
+	                e.printStackTrace();
+	            }
+	        }).start();
+		} else {
+			System.out.println("Faltan jugadores para comenzar el juego");
+		}
+	}
+	
+	// *************************************************************
 	//                    PASAJE DE CARTAS
 	// *************************************************************
 	
@@ -173,6 +261,7 @@ public class VistaConsola implements IVista {
 	@Override
 	public void cartasRepartidas() throws RemoteException {
 		corazonesRotos = "";
+		mostrarMenu = false;
 		System.out.println("Repartiendo cartas!");
 	}
 	
@@ -392,6 +481,8 @@ public class VistaConsola implements IVista {
 			System.out.println("El ganador fue " + this.controlador.ganadorJuego());
 			System.out.println("¡¡¡FELICIDADES!!!");
 		}
+		
+		iniciar();
 		
 	}
 	

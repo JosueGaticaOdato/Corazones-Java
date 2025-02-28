@@ -15,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 
 import ar.edu.unlu.corazones.modelo.Carta;
 
@@ -25,7 +26,7 @@ public class VistaCarta extends JPanel {
 	
 	private final int ANCHO = 60;
 	private final int ALTO = 90;
-	private final int TAMAÑO_FUENTE = 20;
+	private final int TAMAÑO_FUENTE = 15;
 	
 	private Carta carta;
 	
@@ -48,8 +49,9 @@ public class VistaCarta extends JPanel {
         setBackground(Color.WHITE);
         setOpaque(false);
         setPreferredSize(new Dimension(ANCHO, ALTO)); // Tamaño fijo de la carta
+        setBorder(new LineBorder(Color.WHITE, 2));
         //setCarta(null);
-        cartaDesdeAtras();
+        //cartaDesdeAtras();
     }
 
 	// *************************************************************
@@ -132,6 +134,16 @@ public class VistaCarta extends JPanel {
 
 	public void setMarcada(boolean marcada) {
 	    this.marcada = marcada;
+	}
+
+	public int getAncho() {
+		// TODO Auto-generated method stub
+		return this.ANCHO;
+	}
+	
+	public int getAlto() {
+		// TODO Auto-generated method stub
+		return this.ALTO;
 	}
 	
 }

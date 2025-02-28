@@ -481,14 +481,20 @@ public class VistaGrafica extends JFrame implements IVista {
 	}
 	
 	private JPanel crearPanelJugadorCentro(String nombre, VistaCarta carta, Font fuente, Color color) {
-	    JPanel panelJugador = new JPanel();
+		JPanel panelJugador = new JPanel();
 	    panelJugador.setLayout(new BorderLayout());
 	    panelJugador.setOpaque(false);
+
+	    // Tamaño fijo de panel
+	    int anchoPanel = carta.getAncho(); 
+	    int altoPanel = carta.getAlto() + 30; //Para el espacio con el JLabel
+	    panelJugador.setPreferredSize(new Dimension(anchoPanel, altoPanel));
 
 	    JLabel labelNombre = new JLabel(nombre, SwingConstants.CENTER);
 	    labelNombre.setFont(fuente);
 	    labelNombre.setForeground(color);
 
+	    //panelJugador.add(labelNombre);
 	    panelJugador.add(labelNombre, BorderLayout.NORTH);
 	    panelJugador.add(carta, BorderLayout.CENTER);
 	    

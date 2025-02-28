@@ -18,8 +18,8 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final int cantCartasRepartidas = 5; // TESTING (13)
-	private static final int cantCartasIntercambio = 2; // TESTING (3)
+	private static final int cantCartasRepartidas = 13; // TESTING (13)
+	private static final int cantCartasIntercambio = 3; // TESTING (3)
 	private static final int puntajeMaximo = 100; // TESTING (100)
 	private static final int cantJugadores = 4;
 	
@@ -84,7 +84,7 @@ public class Corazones extends ObservableRemoto implements ICorazones, Serializa
 			repartirCartas();
 			notificarObservadores(EventosCorazones.CARTAS_REPARTIDAS);
 			juegoTerminado = true;
-			//pasajeDeCartas();
+			pasajeDeCartas();
 			this.corazonesRotos = false;
 			
 			for (int j = 0; j < cantCartasRepartidas; j++) {
